@@ -82,39 +82,49 @@ def bar_chart():
     st.plotly_chart(fig)
 
 
-import plotly.graph_objects as go
 
 def scatter_plot():
-    min_value = data_model["Box"]["box_hole_diameter"]["min_value"]
-    max_value = data_model["Box"]["box_hole_diameter"]["max_value"]
-    target_value = data_model["Box"]["box_hole_diameter"]["target_value"]
+
     df_1 = compute_fit()
 
     # Allow users to choose columns for the scatter plot
     df_1 = df_1.drop(columns=['ID'], axis=1)
+    df_2 = pd.DataFrame(columns=["Box","Cylinder"])
 
-    # Allow users to choose columns for the scatter plot
-    selected_columns = st.multiselect("Select columns for scatter plot", df_1.columns, key="multiselect")
+    # Allow users to choose a shape for the scatter plot
+    selected_shape = st.selectbox("Select shape for scatter plot", df_2.columns, key="select_shape")
+    # Filter columns of df_1 based on the selected shape
+    if selected_shape == "Box":
+        related_columns = ["box_hole_diameter","box_hole_depth"]
+    elif selected_shape == "Cylinder":
+        related_columns = ["cylinder_diameter", "cylinder_height"]
+    else:
+        related_columns = []
+    selected_column = st.selectbox("Select a column for scatter plot", related_columns, key="select_column")
 
     # Define colors for "yes" and "no" values
     yes_color = '#FF7F0E'
     no_color = 'grey'
 
-    if len(selected_columns) >= 1:
-        # Create scatter plot if at least two columns are selected
+    if selected_shape and selected_column:
+        # Create scatter plot if at least one shape and one column are selected
         st.write("Scatter Plot:")
         fig = go.Figure()
+
         # Set color based on 'check' value
-        for col in selected_columns:
-            colors = [yes_color if val == 'yes' else no_color for val in df_1["check"]]
-            fig.add_trace(go.Scatter(x=df_1.index, y=df_1[col], mode='markers', name=col, marker=dict(color=colors)))
+        min_value = data_model[selected_shape][selected_column]["min_value"]
+        max_value = data_model[selected_shape][selected_column]["max_value"]
+        target_value = data_model[selected_shape][selected_column]["target_value"]
+        colors = [yes_color if val == 'yes' else no_color for val in df_1["check"]]
+        fig.add_trace(go.Scatter(x=df_1.index, y=df_1[selected_column], mode='markers', name=selected_column, marker=dict(color=colors)))
+
         # Add horizontal lines for minimum, maximum, and target values
         fig.add_shape(type="line", x0=df_1.index.min(), y0=min_value, x1=df_1.index.max(), y1=min_value,
-                      line=dict(color="red", width=2, dash="dash"))
+                      line=dict(color="red", width=1, dash="solid"))
         fig.add_shape(type="line", x0=df_1.index.min(), y0=max_value, x1=df_1.index.max(), y1=max_value,
-                      line=dict(color="red", width=2, dash="dash"))
+                      line=dict(color="red", width=1, dash="solid"))
         fig.add_shape(type="line", x0=df_1.index.min(), y0=target_value, x1=df_1.index.max(), y1=target_value,
-                      line=dict(color="lime", width=2, dash="dash"))
+                      line=dict(color="lime", width=1, dash="solid"))
 
         # Add names for the lines
         fig.add_annotation(
@@ -150,7 +160,7 @@ def scatter_plot():
 
         st.plotly_chart(fig)
     else:
-        st.warning("Please select at least two columns for the scatter plot.")
+        st.warning("Please select a shape and a column for the scatter plot.")
 
 
 
