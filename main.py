@@ -64,9 +64,8 @@ def box_plot():
 
 def bar_chart():
     df_1, count_yes, count_no = count_yes_no()
-    distinct_check_value = list(set(df_1['check']))
     data = {
-        'Category': distinct_check_value,
+        'Category': ['yes', 'no'],
         'Value': [count_yes, count_no]
     }
     df = pd.DataFrame(data)
@@ -82,7 +81,6 @@ def main():
     box_plot()
     bar_chart()
 
-    # compute_fit()
 
 
 if __name__ == "__main__":
