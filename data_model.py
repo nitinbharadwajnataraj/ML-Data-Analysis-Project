@@ -1,10 +1,19 @@
+# Preloaded dictionaries containing target, min, max values, and factors for each process
 data_model = {
-    "Box": {
-        "box_hole_diameter": {"target_value": 30, "min_value": 27, "max_value": 33, "factor": 1},
-        "box_hole_depth": {"target_value": 40, "min_value": 36, "max_value": 45, "factor": 1}
+    "Cube": {
+        "Cube_Diameter": {"target_value": 30, "min_value": 28, "max_value": 32, "min_eq_target": False,
+                          "factor": 1.0},
+        "Hole_Depth": {"target_value": 40, "min_value": 37, "max_value": 43, "min_eq_target": False,
+                       "factor": 1.0}
     },
     "Cylinder": {
-        "cylinder_diameter": {"target_value": 40, "min_value": 36, "max_value": 44, "factor": 1},
-        "cylinder_height": {"target_value": 30, "min_value": 26, "max_value": 36, "factor": 1}
+        "Cylinder_Diameter": {"target_value": 40, "min_value": 38.5, "max_value": 41.5, "min_eq_target": False,
+                              "factor": 1.0},
+        "Cylinder_Height": {"target_value": 30, "min_value": 27.5, "max_value": 32.5, "min_eq_target": False,
+                            "factor": 1.0}
+    },
+    "Alignment": {
+        "Joining_Force": {"target_value": 10, "min_value": 9, "max_value": 11, "min_eq_target": False,
+                          "factor": 1.0}
     }
 }
