@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 from data_model import data_model as hairpin_data_model, data_model
 from create_fake_data import create_fake_dataset
 from Compute_fit import compute_fit, count_yes_no
-
+from clustering.k_means import perform_kmeans
 
 def df_return():
     df = create_fake_dataset()
