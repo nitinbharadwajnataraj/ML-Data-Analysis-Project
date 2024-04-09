@@ -16,10 +16,10 @@ def kmeans_main():
 
 
     sections = {
-        'Clusters 4 Operators': 'section-1'
+        'Cluster Analysis': 'section-1'
     }
 
-    st.header("KMeans Data Performance")
+    st.header("Synthetic Data")
 
     num_clusters = "Automatic"
     if num_clusters == "Automatic":
@@ -31,7 +31,7 @@ def kmeans_main():
         st.session_state["engineering_df"] = engineering_df
         st.write(fake_data)
 
-    st.header("Clusters 4 Operators", anchor=sections['Clusters 4 Operators'])
+    st.header("Cluster Analysis", anchor=sections['Cluster Analysis'])
     df = df_return()
 
     num_clusters = st.selectbox('Number of clusters', ["Automatic", 2, 3, 4, 5, 6, 7, 8, 9, 10], index=3)
