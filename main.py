@@ -77,6 +77,9 @@ def bar_chart():
 
     # Display the chart in Streamlit
     st.plotly_chart(fig)
+
+
+
 def main():
     scatter_plot()
     box_plot()
