@@ -1,3 +1,4 @@
+import pandas
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -10,9 +11,73 @@ from clustering.k_means import perform_kmeans
 
 st.set_page_config(layout="wide")
 
-def df_return():
-    df = create_fake_dataset()
-    return df
+def color_code(val):
+    if val == 'OK':
+        color = 'green'
+    elif val == 'NOK':
+        color = 'red'
+    elif val == 'Transition':
+        color = 'lightblue'
+    elif val == 'Clearance':
+        color = 'yellow'
+    else:
+        color = 'grey'
+    return f'background-color: {color}'
+def df_fitting_and_evaluation():
+    df = compute_fit()
+    df["fitting"] = df["box_hole_diameter"] - df["cylinder_diameter"]
+
+    # Using & instead of 'and'
+    condition1 = (df["fitting"] <= 1) & (df["fitting"] >= -1)
+    condition2 = (df["fitting"] > 1)
+
+    # Assigning values based on conditions
+    df.loc[condition1, "Evaluation"] = 'OK'
+    df.loc[condition1, "fitting_group"] = 'Transition'
+    df.loc[condition2, "Evaluation"] = 'NOK'
+    df.loc[condition2, "fitting_group"] = 'Clearance'
+    df.loc[~(condition1 | condition2), "Evaluation"] = 'NOK'
+    df.loc[~(condition1 | condition2), "fitting_group"] = 'Excess'
+
+    styled_df = df.style.applymap(color_code, subset=['Evaluation', 'fitting_group'])
+
+    return df, styled_df
+
+
+def df_bar_chart_Evaluation():
+    df1, df2 = df_fitting_and_evaluation()
+    count_ok, count_nok = 0, 0
+    for val in df1["Evaluation"]:
+        if val is 'OK':
+            count_ok += 1
+        elif val is 'NOK':
+            count_nok += 1
+
+    data = {'Category': ['OK','NOK'], 'Value': [count_ok, count_nok]}
+    df = pd.DataFrame(data)
+
+    fig = go.Figure(data=[go.Bar(x=df['Category'], y=df['Value'])])
+    fig.update_layout(title='Evaluation Results', xaxis_title='Category', yaxis_title='Value')
+    st.plotly_chart(fig)
+
+
+def df_bar_chart_fitting_group():
+    df1, df2 = df_fitting_and_evaluation()
+    count_transition, count_clearance, count_excess = 0, 0, 0
+    for val in df1["fitting_group"]:
+        if val is 'Excess':
+            count_excess += 1
+        elif val is 'Clearance':
+            count_clearance += 1
+        elif val is 'Transition':
+            count_transition += 1
+
+    data = {'Category': ['Transition', 'Clearance', 'Excess'], 'Value': [count_transition, count_clearance, count_excess]}
+    df = pd.DataFrame(data)
+
+    fig = go.Figure(data=[go.Bar(x=df['Category'], y=df['Value'])])
+    fig.update_layout(title='Fitting Groups', xaxis_title='Category', yaxis_title='Value')
+    st.plotly_chart(fig)
 
 def scatter_plot():
     df_1 = compute_fit()
@@ -81,7 +146,7 @@ def scatter_plot():
                 st.warning("Please select a column for the scatter plot.")
 
 def box_plot():
-    df = df_return()
+    df = pd.read_excel("fake_data.xlsx")
     fig = go.Figure()
     for column in df.columns[1:]:
         fig.add_trace(go.Box(y=df[column], name=column))
@@ -90,6 +155,8 @@ def box_plot():
 
 def bar_chart():
     df_1, count_yes, count_no = count_yes_no()
+    df2,df3 = df_fitting_and_evaluation()
+    st.dataframe(df3, width=800)
     distinct_check_value = list(set(df_1['check']))
     data = {'Category': distinct_check_value, 'Value': [count_yes, count_no]}
     df = pd.DataFrame(data)
@@ -110,14 +177,14 @@ def kmeans():
     if num_clusters == "Automatic":
         num_clusters = None
 
-    fake_data = df_return()
+    fake_data = pd.read_excel("fake_data.xlsx")
     if "engineering_df" not in st.session_state:
         engineering_df = pd.read_excel("Engineering_data.xlsx")
         st.session_state["engineering_df"] = engineering_df
         st.write(fake_data)
 
     st.header("Cluster Analysis", anchor=sections['Clusters 4 Operators'])
-    df = df_return()
+    df = pd.read_excel("fake_data.xlsx")
 
     num_clusters = st.selectbox('Number of clusters', ["Automatic", 2, 3, 4, 5, 6, 7, 8, 9, 10], index=3)
 
@@ -209,7 +276,8 @@ def main():
 
     if nav == 'Bar-Chart':
         bar_chart()
-
+        df_bar_chart_Evaluation()
+        df_bar_chart_fitting_group()
     elif nav == 'Plot':
         tab1, tab2 = st.tabs(["Box-Plot", "Scatter-Plot"])
         with tab1:
