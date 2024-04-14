@@ -4,6 +4,10 @@ import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
+from sklearn.cluster import KMeans, DBSCAN
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+
 from data_model import data_model
 from create_fake_data import create_fake_dataset
 from Compute_fit import compute_fit, count_yes_no
@@ -46,7 +50,7 @@ def df_fitting_and_evaluation():
 
 def df_bar_chart_Evaluation():
     df1, df2 = df_fitting_and_evaluation()
-    st.dataframe(df2, width=800)
+    # st.dataframe(df2, width=800)
     count_ok, count_nok = 0, 0
     for val in df1["Evaluation"]:
         if val is 'OK':
@@ -172,11 +176,12 @@ def kmeans_info_popover():
 def kmeans():
     sections = {'Clusters 4 Operators': 'section-1'}
 
-    st.header("Synthetic Data")
+    # st.header("Synthetic Data")
 
-    num_clusters = "Automatic"
-    if num_clusters == "Automatic":
-        num_clusters = None
+    # num_clusters = "Automatic"
+    #
+    # if num_clusters == "Automatic":
+    #     num_clusters = None
 
     fake_data = pd.read_excel("fake_data.xlsx")
     if "engineering_df" not in st.session_state:
@@ -186,11 +191,15 @@ def kmeans():
 
     st.header("Cluster Analysis", anchor=sections['Clusters 4 Operators'])
     df = pd.read_excel("fake_data.xlsx")
-
-    num_clusters = st.selectbox('Number of clusters', ["Automatic", 2, 3, 4, 5, 6, 7, 8, 9, 10], index=3)
-
-    if num_clusters == "Automatic":
+    automatic_clusters = st.checkbox("Automatic", False)
+    if automatic_clusters:
         num_clusters = None
+    else:
+        num_clusters = st.selectbox('Number of clusters', [2, 3, 4, 5, 6, 7, 8, 9, 10], index=1)
+    # num_clusters = st.selectbox('Number of clusters', ["Automatic", 2, 3, 4, 5, 6, 7, 8, 9, 10], index=3)
+
+    # if num_clusters == "Automatic":
+    #     num_clusters = None
 
     df = df.drop(columns=['ID'], axis=1)
     columns = df.columns.tolist()
@@ -262,6 +271,103 @@ def kmeans():
 
     st.plotly_chart(fig)
 
+
+
+
+def kmeans_clustering_fitting_distance():
+    df1, df2 = df_fitting_and_evaluation()
+    st.dataframe(df2, width=1000)
+    # Extracting the 'fitting_distance' column
+    main_df, df1 = df_fitting_and_evaluation()
+    df_for_clustering = main_df.drop(columns=['ID', 'Evaluation'])
+    fitting_distance_data = df_for_clustering['fitting_distance'].values.reshape(-1, 1)
+
+    # Specify the number of clusters
+    n_clusters = 3
+
+    # Initialize KMeans model
+    kmeans = KMeans(n_clusters = n_clusters, random_state=42)
+
+    # Fit the model to the data
+    kmeans.fit(fitting_distance_data)
+
+    # Add cluster labels to the DataFrame
+    df_for_clustering['cluster_label'] = kmeans.labels_
+    # st.write(df_for_clustering)
+    # if df_for_clustering['']
+    # df_for_clustering['cluster_name_cm'] =
+
+    # Display the cluster centers
+    # st.write("Cluster centers:")
+    #st.write(kmeans.cluster_centers_)
+    centers = []
+    for x in kmeans.cluster_centers_:
+        for y in x:
+            centers.append(y)
+    print(centers)
+    # Plotting using Plotly
+    fig = px.scatter(df_for_clustering, y='fitting_distance', color='cluster_label',
+                     title='KMeans Clustering based on Fitting Distance')
+
+    # Plotting cluster centers
+    fig.add_scatter(y=centers, x=[500] * n_clusters, mode='markers',
+                    marker=dict(color='black', size=10), name='Cluster Centers')
+
+
+    # st.write(df_for_clustering['cluster_label'])
+    st.plotly_chart(fig)
+
+def fitting_group_visualisation_kmeans():
+    main_df, df1 = df_fitting_and_evaluation()
+    df_vis = main_df.loc[:, ['ID', 'fitting_distance','fitting_group']]
+    #st.dataframe(df_vis)
+    # Plotting using Plotly
+    fig = px.scatter(df_vis, x='ID', y='fitting_distance', color='fitting_group',
+                     title='Fitting Distance vs Number of Points',
+                     labels={'ID': 'Number of Points', 'fitting_distance': 'Fitting Distance'})
+
+    # Customize the layout
+    fig.update_layout(showlegend=True)
+
+    # confusion_matrix(y_true, y_pred)
+
+    st.plotly_chart(fig)
+
+
+def fitting_group_visualisation_dbscan():
+    main_df, df1 = df_fitting_and_evaluation()
+    df_vis = main_df.loc[:, ['ID', 'fitting_distance', 'fitting_group']]
+
+    # Apply DBSCAN clustering
+    clustering = DBSCAN(eps=0.2, min_samples=3).fit(df_vis[['fitting_distance']])
+
+    # Add cluster labels to the DataFrame
+    cluster_labels = clustering.labels_
+    unique_clusters = np.unique(cluster_labels)
+    if -1 in unique_clusters:
+        unique_clusters = unique_clusters[1:]
+    label_mapping = {cluster: i for i, cluster in enumerate(unique_clusters)}
+    df_vis['cluster_label'] = cluster_labels
+    df_vis['cluster_label'] = df_vis['cluster_label'].map(label_mapping).fillna(-1).astype(int)
+    # st.write(df_vis)
+    # Plotting using Plotly
+    fig = px.scatter(df_vis, x='ID', y='fitting_distance', color='cluster_label',
+                     title='Fitting Distance vs Number of Points (DBSCAN Clustering)',
+                     labels={'ID': 'Number of Points', 'fitting_distance': 'Fitting Distance',
+                             'cluster_label': 'Cluster'})
+
+    # Plotting using Plotly
+    fig = px.scatter(df_vis, x='ID', y='fitting_distance', color='cluster_label',
+                     title='Fitting Distance vs Number of Points (DBSCAN Clustering)',
+                     labels={'ID': 'Number of Points', 'fitting_distance': 'Fitting Distance',
+                             'cluster_label': 'Cluster'})
+
+    # Customize the layout
+    fig.update_layout(showlegend=True)
+
+    # Show the plot
+    st.plotly_chart(fig)
+
 def main():
     st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
 
@@ -279,6 +385,7 @@ def main():
         #bar_chart()
         df_bar_chart_Evaluation()
         df_bar_chart_fitting_group()
+
     elif nav == 'Plot':
         tab1, tab2 = st.tabs(["Box-Plot", "Scatter-Plot"])
         with tab1:
@@ -289,6 +396,9 @@ def main():
             scatter_plot()
     elif nav == 'k-means':
         kmeans_info_popover()
+        kmeans_clustering_fitting_distance()
+        fitting_group_visualisation_kmeans()
+        fitting_group_visualisation_dbscan()
         kmeans()
 
 if __name__ == "__main__":
