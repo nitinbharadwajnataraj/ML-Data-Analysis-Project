@@ -2,7 +2,7 @@ import random
 import pandas as pd
 import streamlit as st
 import functools as ft
-
+import os
 from data_model import data_model as hairpin_data_model, data_model
 
 def generate_fake_data(num_rows, process_data_model):
@@ -38,4 +38,4 @@ fake_data = create_fake_dataset()
 # path = os.path.join(os.path.expanduser('~'),'Downloads')
 # file_path = os.path.join(path, 'fake_data.csv')
 # fake_data.to_csv(file_path, index=False)
-#print(fake_data)
+# print(fake_data)

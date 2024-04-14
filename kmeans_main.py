@@ -11,7 +11,7 @@ st.set_page_config(layout="wide")
 
 def kmeans_main():
     def df_return():
-        df = create_fake_dataset()
+        df = pd.read_excel("fake_data.xlsx")
         return df
 
 

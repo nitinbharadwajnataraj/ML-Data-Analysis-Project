@@ -6,7 +6,7 @@ import os
 
 
 def compute_fit():
-    df = create_fake_dataset()
+    df = pd.read_excel("fake_data.xlsx")
     box_hole_diameter_error_allowance = 2
     box_hole_depth_error_allowance = 3
     cylinder_diameter_error_allowance = 1.5
