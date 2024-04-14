@@ -3,7 +3,8 @@ import pandas as pd
 import streamlit as st
 import functools as ft
 
-from data_model import data_model as hairpin_data_model, data_model
+from data_model import data_model
+
 
 def generate_fake_data(num_rows, process_data_model):
     data = []
@@ -14,10 +15,27 @@ def generate_fake_data(num_rows, process_data_model):
             min_value = values["min_value"]
             max_value = values["max_value"]
             # Removed "factor" from calculation as it's not needed
-            value = random.normalvariate(target_value, (max_value - min_value)/2)
+            value = random.normalvariate(target_value, (max_value - min_value) / 2)
             row_data[param] = value
+        # Adding radial gap and fitting group
+
+        row_data["radial_gap"] = row_data["box_hole_diameter"] - row_data["cylinder_diameter"]
+        if -1 <= row_data["radial_gap"] <= 1:
+            row_data["evaluation"] = "OK"
+        else:
+            row_data["evaluation"] = "NOK"
+
+        # Determine fitting group
+        if -1 <= row_data["radial_gap"] <= 1:
+            row_data["fitting_group"] = "Transition fit"
+        elif row_data["radial_gap"] >= 1:
+            row_data["fitting_group"] = "Clearance fit"
+        elif row_data["radial_gap"] <= -1:
+            row_data["fitting_group"] = "Excess fit"
+
         data.append(row_data)
     return data
+
 
 def generate_dataset(num_rows, data_model):
     dfs = []
@@ -29,10 +47,12 @@ def generate_dataset(num_rows, data_model):
     df_final = ft.reduce(lambda left, right: pd.merge(left, right, on='ID'), dfs)
     return df_final
 
+
 def create_fake_dataset():
     num_rows = 1000  # Adjust the number of rows as needed
     fake_dataset = generate_dataset(num_rows, data_model)
     return fake_dataset
+
 
 fake_data = create_fake_dataset()
 # path = os.path.join(os.path.expanduser('~'),'Downloads')
