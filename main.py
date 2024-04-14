@@ -24,12 +24,12 @@ def color_code(val):
         color = 'grey'
     return f'background-color: {color}'
 def df_fitting_and_evaluation():
-    df = compute_fit()
-    df["fitting"] = df["box_hole_diameter"] - df["cylinder_diameter"]
+    df = pd.read_excel("fake_data.xlsx")
+    df["fitting_distance"] = df["box_hole_diameter"] - df["cylinder_diameter"]
 
     # Using & instead of 'and'
-    condition1 = (df["fitting"] <= 1) & (df["fitting"] >= -1)
-    condition2 = (df["fitting"] > 1)
+    condition1 = (df["fitting_distance"] <= 1) & (df["fitting_distance"] >= -1)
+    condition2 = (df["fitting_distance"] > 1)
 
     # Assigning values based on conditions
     df.loc[condition1, "Evaluation"] = 'OK'
@@ -46,6 +46,7 @@ def df_fitting_and_evaluation():
 
 def df_bar_chart_Evaluation():
     df1, df2 = df_fitting_and_evaluation()
+    st.dataframe(df2, width=800)
     count_ok, count_nok = 0, 0
     for val in df1["Evaluation"]:
         if val is 'OK':
@@ -275,7 +276,7 @@ def main():
     nav = st.session_state.selected_nav
 
     if nav == 'Bar-Chart':
-        bar_chart()
+        #bar_chart()
         df_bar_chart_Evaluation()
         df_bar_chart_fitting_group()
     elif nav == 'Plot':
