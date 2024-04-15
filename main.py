@@ -17,16 +17,27 @@ st.set_page_config(layout="wide")
 
 def color_code(val):
     if val == 'OK':
-        color = 'green'
+        color = 'rgba(0, 255, 0, 0.3)'
     elif val == 'NOK':
-        color = 'red'
+        color = 'rgba(255, 0, 0, 0.3)'
     elif val == 'Transition':
         color = 'lightblue'
     elif val == 'Clearance':
         color = 'yellow'
     else:
-        color = 'grey'
+        color = 'rgba(255, 165, 0, 0.3)'
     return f'background-color: {color}'
+
+def color_code2(val):
+    if (val <= 1) and (val >= -1):
+        color = 'lightblue'
+    elif val > 1:
+        color = 'yellow'
+    elif val < -1:
+        color = 'rgba(255, 165, 0, 0.3)' 
+    return f'background-color: {color}'
+
+
 def df_fitting_and_evaluation():
     df = pd.read_excel("fake_data.xlsx")
     df["fitting_distance"] = df["box_hole_diameter"] - df["cylinder_diameter"]
@@ -43,7 +54,8 @@ def df_fitting_and_evaluation():
     df.loc[~(condition1 | condition2), "Evaluation"] = 'NOK'
     df.loc[~(condition1 | condition2), "fitting_group"] = 'Excess'
 
-    styled_df = df.style.applymap(color_code, subset=['Evaluation', 'fitting_group'])
+    styled_df = df.style.applymap(color_code, subset=['Evaluation', 'fitting_group' ])
+    styled_df = styled_df.applymap(color_code2, subset=['fitting_distance'])
 
     return df, styled_df
 
@@ -58,7 +70,7 @@ def df_bar_chart_Evaluation():
         elif val is 'NOK':
             count_nok += 1
 
-    data = {'Category': ['OK','NOK'], 'Value': [count_ok, count_nok]}
+    data = {'Category': ['OK', 'NOK'], 'Value': [count_ok, count_nok]}
     df = pd.DataFrame(data)
 
     fig = go.Figure(data=[go.Bar(x=df['Category'], y=df['Value'])])
@@ -77,17 +89,19 @@ def df_bar_chart_fitting_group():
         elif val is 'Transition':
             count_transition += 1
 
-    data = {'Category': ['Transition', 'Clearance', 'Excess'], 'Value': [count_transition, count_clearance, count_excess]}
+    data = {'Category': ['Transition', 'Clearance', 'Excess'],
+            'Value': [count_transition, count_clearance, count_excess]}
     df = pd.DataFrame(data)
 
     fig = go.Figure(data=[go.Bar(x=df['Category'], y=df['Value'])])
     fig.update_layout(title='Fitting Groups', xaxis_title='Category', yaxis_title='Value')
     st.plotly_chart(fig)
 
+
 def scatter_plot():
     df_1 = compute_fit()
     df_1 = df_1.drop(columns=['ID'], axis=1)
-    col1, col2 = st.columns([0.3,0.7])
+    col1, col2 = st.columns([0.3, 0.7])
     with col1:
         selected_shape = st.selectbox("Select shape for scatter plot", ["Box", "Cylinder"], key="select_shape")
 
@@ -150,6 +164,7 @@ def scatter_plot():
             else:
                 st.warning("Please select a column for the scatter plot.")
 
+
 def box_plot():
     df = pd.read_excel("fake_data.xlsx")
     fig = go.Figure()
@@ -158,9 +173,10 @@ def box_plot():
     fig.update_layout(title='Box Plot(Fake_data understanding)', xaxis_title='Parameters', yaxis_title='Values')
     st.plotly_chart(fig)
 
+
 def bar_chart():
     df_1, count_yes, count_no = count_yes_no()
-    df2,df3 = df_fitting_and_evaluation()
+    df2, df3 = df_fitting_and_evaluation()
     st.dataframe(df3, width=800)
     distinct_check_value = list(set(df_1['check']))
     data = {'Category': distinct_check_value, 'Value': [count_yes, count_no]}
@@ -170,18 +186,14 @@ def bar_chart():
     fig.update_layout(title='Bar Chart', xaxis_title='Category', yaxis_title='Value')
     st.plotly_chart(fig)
 
+
 def kmeans_info_popover():
-    st.popover("K-Means analysis provides insights into data clustering. It helps in identifying patterns and grouping similar data points together. Select the number of clusters and features for clustering to visualize the results.")
+    st.popover(
+        "K-Means analysis provides insights into data clustering. It helps in identifying patterns and grouping similar data points together. Select the number of clusters and features for clustering to visualize the results.")
+
 
 def kmeans():
     sections = {'Clusters 4 Operators': 'section-1'}
-
-    # st.header("Synthetic Data")
-
-    # num_clusters = "Automatic"
-    #
-    # if num_clusters == "Automatic":
-    #     num_clusters = None
 
     fake_data = pd.read_excel("fake_data.xlsx")
     if "engineering_df" not in st.session_state:
@@ -191,93 +203,96 @@ def kmeans():
 
     st.header("Cluster Analysis", anchor=sections['Clusters 4 Operators'])
     df = pd.read_excel("fake_data.xlsx")
-    automatic_clusters = st.checkbox("Automatic", False)
-    if automatic_clusters:
-        num_clusters = None
-    else:
-        num_clusters = st.selectbox('Number of clusters', [2, 3, 4, 5, 6, 7, 8, 9, 10], index=1)
-    # num_clusters = st.selectbox('Number of clusters', ["Automatic", 2, 3, 4, 5, 6, 7, 8, 9, 10], index=3)
+    with st.popover("Number of Clusters"):
+        automatic_clusters = st.checkbox("Automatic", False)
+        if automatic_clusters:
+            num_clusters = None
+        else:
+            num_clusters = st.selectbox('Number of clusters', [2, 3, 4, 5, 6, 7, 8, 9, 10], index=1)
 
-    # if num_clusters == "Automatic":
-    #     num_clusters = None
 
     df = df.drop(columns=['ID'], axis=1)
     columns = df.columns.tolist()
     cluster_columns = st.multiselect('Select columns for clustering', columns, default=columns[2:6])
     fake_data = df[cluster_columns].values
 
-    cluster_labels, cluster_centers, inertia, optimal_k = perform_kmeans(fake_data, num_clusters)
-    center_df = pd.DataFrame(cluster_centers, columns=cluster_columns)
-    cluster_names = [f'Cluster {i}' for i in range(optimal_k)]
-    center_df['Name'] = cluster_names
-    engineering_df = pd.read_excel("Engineering_data.xlsx")  # check df session control
-    cluster_df = center_df
+    try:
+        cluster_labels, cluster_centers, inertia, optimal_k = perform_kmeans(fake_data, num_clusters)
+        center_df = pd.DataFrame(cluster_centers, columns=cluster_columns)
+        cluster_names = [f'Cluster {i}' for i in range(optimal_k)]
+        center_df['Name'] = cluster_names
+        engineering_df = pd.read_excel("Engineering_data.xlsx")  # check df session control
+        cluster_df = center_df
 
-    st.subheader('Cluster Centers', anchor='cluster-centers')
-    cluster_df["index_num"] = cluster_df.index
-    figures = {}
+        st.subheader('Cluster Centers', anchor='cluster-centers')
+        cluster_df["index_num"] = cluster_df.index
+        figures = {}
 
-    for column in cluster_columns:
-        fig = px.scatter(cluster_df, x="index_num", y=column, color="Name")
-        fig.update_traces(marker={'size': 15})
+        for column in cluster_columns:
+            fig = px.scatter(cluster_df, x="index_num", y=column, color="Name")
+            fig.update_traces(marker={'size': 15})
 
-        if column in engineering_df['name'].values:
-            target_value = engineering_df.loc[engineering_df['name'] == column, 'target'].values[0]
-            min_value = engineering_df.loc[engineering_df['name'] == column, 'min'].values[0]
-            max_value = engineering_df.loc[engineering_df['name'] == column, 'max'].values[0]
+            if column in engineering_df['name'].values:
+                target_value = engineering_df.loc[engineering_df['name'] == column, 'target'].values[0]
+                min_value = engineering_df.loc[engineering_df['name'] == column, 'min'].values[0]
+                max_value = engineering_df.loc[engineering_df['name'] == column, 'max'].values[0]
 
-            fig.add_shape(type="line", x0=0, y0=target_value, x1=len(cluster_df[column]) - 1, y1=target_value,
-                          line=dict(color="green", width=1), name='target')
-            fig.add_shape(type="line", x0=0, y0=min_value, x1=len(cluster_df[column]) - 1, y1=min_value,
-                          line=dict(color="violet", width=1), name='min')
-            fig.add_shape(type="line", x0=0, y0=max_value, x1=len(cluster_df[column]) - 1, y1=max_value,
-                          line=dict(color="red", width=1), name='max')
+                fig.add_shape(type="line", x0=0, y0=target_value, x1=len(cluster_df[column]) - 1, y1=target_value,
+                              line=dict(color="green", width=1), name='target')
+                fig.add_shape(type="line", x0=0, y0=min_value, x1=len(cluster_df[column]) - 1, y1=min_value,
+                              line=dict(color="violet", width=1), name='min')
+                fig.add_shape(type="line", x0=0, y0=max_value, x1=len(cluster_df[column]) - 1, y1=max_value,
+                              line=dict(color="red", width=1), name='max')
 
-        fig.update_layout(title=f"Cluster Centers for {column}", xaxis_title="Cluster Index", yaxis_title=column)
-        figures[column] = fig
+            fig.update_layout(title=f"Cluster Centers for {column}", xaxis_title="Cluster Index", yaxis_title=column)
+            figures[column] = fig
 
-    selected_graph = st.selectbox("Select Graph", cluster_columns)
-    st.plotly_chart(figures[selected_graph])
+        selected_graph = st.selectbox("Select Graph", cluster_columns)
+        st.plotly_chart(figures[selected_graph])
 
-    cluster_max_values = []
-    cluster_min_values = []
+        cluster_max_values = []
+        cluster_min_values = []
 
-    for i in range(optimal_k):
-        cluster_data = fake_data[cluster_labels == i]
-        cluster_max = np.max(cluster_data, axis=0)
-        cluster_min = np.min(cluster_data, axis=0)
-        cluster_max_values.append(cluster_max)
-        cluster_min_values.append(cluster_min)
+        for i in range(optimal_k):
+            cluster_data = fake_data[cluster_labels == i]
+            cluster_max = np.max(cluster_data, axis=0)
+            cluster_min = np.min(cluster_data, axis=0)
+            cluster_max_values.append(cluster_max)
+            cluster_min_values.append(cluster_min)
 
-    max_df = pd.DataFrame(cluster_max_values, columns=cluster_columns)
-    min_df = pd.DataFrame(cluster_min_values, columns=cluster_columns)
+        max_df = pd.DataFrame(cluster_max_values, columns=cluster_columns)
+        min_df = pd.DataFrame(cluster_min_values, columns=cluster_columns)
 
-    max_df['Cluster'] = [f'Cluster {i}' for i in range(optimal_k)]
-    min_df['Cluster'] = [f'Cluster {i}' for i in range(optimal_k)]
+        max_df['Cluster'] = [f'Cluster {i}' for i in range(optimal_k)]
+        min_df['Cluster'] = [f'Cluster {i}' for i in range(optimal_k)]
 
-    fig = go.Figure()
+        fig = go.Figure()
 
-    for i, column in enumerate(cluster_columns):
-        for j in range(optimal_k):
-            fig.add_trace(go.Bar(x=[f'Cluster {j} - Min', f'Cluster {j} - Max'],
-                                 y=[min_df[column][j], max_df[column][j]],
-                                 name=column,
-                                 marker_color=px.colors.qualitative.Set1[j]))
+        for i, column in enumerate(cluster_columns):
+            for j in range(optimal_k):
+                fig.add_trace(go.Bar(x=[f'Cluster {j} - Min', f'Cluster {j} - Max'],
+                                     y=[min_df[column][j], max_df[column][j]],
+                                     name=column,
+                                     marker_color=px.colors.qualitative.Set1[j]))
 
-    fig.update_layout(title="Min and Max Values for Each Cluster",
-                      xaxis_title="Cluster",
-                      yaxis_title="Value",
-                      barmode='group')
+        fig.update_layout(title="Min and Max Values for Each Cluster",
+                          xaxis_title="Cluster",
+                          yaxis_title="Value",
+                          barmode='group')
 
-    st.plotly_chart(fig)
+        st.plotly_chart(fig)
 
+    except ValueError as e:
+        st.error("Please select atleast one column for clustering")
 
 def fitting_group_visualisation():
+    st.header("Synthetic Data")
     main_df, df1 = df_fitting_and_evaluation()
     st.dataframe(df1, width=1000)
+    st.header("K-means")
     col1, col2 = st.columns(2)
     with col1:
-        #kmeans clustering for fitting distance
+        # kmeans clustering for fitting distance
         df_for_clustering = main_df.drop(columns=['ID', 'Evaluation'])
         fitting_distance_data = df_for_clustering['fitting_distance'].values.reshape(-1, 1)
         # Specify the number of clusters
@@ -314,7 +329,7 @@ def fitting_group_visualisation():
         # st.write(df_for_clustering['cluster_label'])
         st.plotly_chart(fig, use_container_width=True)
     with col2:
-        #fitting group visualization kmeans
+        # fitting group visualization kmeans
         df_vis = main_df.loc[:, ['ID', 'fitting_distance', 'fitting_group']]
         # st.dataframe(df_vis)
         # Plotting using Plotly
@@ -334,6 +349,7 @@ def fitting_group_visualisation_dbscan():
     main_df, df1 = df_fitting_and_evaluation()
     df_vis = main_df.loc[:, ['ID', 'fitting_distance', 'fitting_group']]
 
+    st.header("DBSCAN")
     # Apply DBSCAN clustering
     clustering = DBSCAN(eps=0.2, min_samples=3).fit(df_vis[['fitting_distance']])
 
@@ -364,6 +380,7 @@ def fitting_group_visualisation_dbscan():
     # Show the plot
     st.plotly_chart(fig)
 
+
 def main():
     st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
 
@@ -378,7 +395,7 @@ def main():
     nav = st.session_state.selected_nav
 
     if nav == 'Bar-Chart':
-        #bar_chart()
+        # bar_chart()
         df_bar_chart_Evaluation()
         df_bar_chart_fitting_group()
 
