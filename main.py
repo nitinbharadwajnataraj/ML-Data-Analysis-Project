@@ -5,7 +5,6 @@ import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 from sklearn.cluster import KMeans, DBSCAN
-import matplotlib.pyplot as plt
 from sklearn.metrics import confusion_matrix
 
 from data_model import data_model
