@@ -54,8 +54,8 @@ def df_fitting_and_evaluation():
     df.loc[~(condition1 | condition2), "Evaluation"] = 'NOK'
     df.loc[~(condition1 | condition2), "fitting_group"] = 'Excess'
 
-    styled_df = df.style.applymap(color_code, subset=['Evaluation', 'fitting_group' ])
-    styled_df = styled_df.applymap(color_code2, subset=['fitting_distance'])
+    styled_df = df.style.map(color_code, subset=['Evaluation', 'fitting_group' ])
+    styled_df = styled_df.map(color_code2, subset=['fitting_distance'])
 
     return df, styled_df
 
@@ -65,9 +65,9 @@ def df_bar_chart_Evaluation():
     # st.dataframe(df2, width=800)
     count_ok, count_nok = 0, 0
     for val in df1["Evaluation"]:
-        if val is 'OK':
+        if val == 'OK':
             count_ok += 1
-        elif val is 'NOK':
+        elif val == 'NOK':
             count_nok += 1
 
     data = {'Category': ['OK', 'NOK'], 'Value': [count_ok, count_nok]}
@@ -82,11 +82,11 @@ def df_bar_chart_fitting_group():
     df1, df2 = df_fitting_and_evaluation()
     count_transition, count_clearance, count_excess = 0, 0, 0
     for val in df1["fitting_group"]:
-        if val is 'Excess':
+        if val == 'Excess':
             count_excess += 1
-        elif val is 'Clearance':
+        elif val == 'Clearance':
             count_clearance += 1
-        elif val is 'Transition':
+        elif val == 'Transition':
             count_transition += 1
 
     data = {'Category': ['Transition', 'Clearance', 'Excess'],
