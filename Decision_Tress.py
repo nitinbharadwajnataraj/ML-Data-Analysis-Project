@@ -86,17 +86,21 @@ def Decision_Tress():
     #This is Validation
     y_pred_val = dtc.predict(x_val)
     print("Confusion Matrics for Validation:")
-    print(confusion_matrix(y_val, y_pred_val))
+    validation_confusion_matrix = confusion_matrix(y_val, y_pred_val)
+    print(validation_confusion_matrix)
     print("classification_report for Validation:")
-    print(classification_report(y_val, y_pred_val))
+    validation_classification_report = classification_report(y_val,y_pred_val)
+    print(validation_classification_report)
 
 
     #this is for Testing
     y_pred_test = dtc.predict(x_test)
     print("Confusion Matrics for TEST:")
-    print(confusion_matrix(y_test, y_pred_test))
+    test_confusion_matrix = confusion_matrix(y_test, y_pred_test)
     print("classification_report of TEST:")
-    print(classification_report(y_test, y_pred_test))
+    print(test_confusion_matrix)
+    test_classification_report = classification_report(y_test, y_pred_test)
+    print(test_classification_report)
 
     features = pd.DataFrame(dtc.feature_importances_, index=X.columns)
     print(features.head(6))
@@ -110,6 +114,7 @@ def Decision_Tress():
     # fig = plt.figure(figsize=(25, 20))
     # _ = tree.plot_tree(dtc, feature_names=X.columns, filled=True)
     #plt.show()
+    return test_confusion_matrix, test_classification_report
 
 Decision_Tress()
 
