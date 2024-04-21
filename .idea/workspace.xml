@@ -4,8 +4,9 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="54c727bd-5502-4d94-92e6-ef0722eaca1d" name="Changes" comment="Made changes to Decision_Tress.py to remove the cycle of import error .">
-      <change beforePath="$PROJECT_DIR$/Decision_Tress.py" beforeDir="false" afterPath="$PROJECT_DIR$/Decision_Tress.py" afterDir="false" />
+    <list default="true" id="54c727bd-5502-4d94-92e6-ef0722eaca1d" name="Changes" comment="Made changes to variables to return to main">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -220,7 +221,7 @@
       <workItem from="1713525109522" duration="7183000" />
       <workItem from="1713606700670" duration="180000" />
       <workItem from="1713626518758" duration="1538000" />
-      <workItem from="1713691282780" duration="9561000" />
+      <workItem from="1713691282780" duration="10597000" />
     </task>
     <task id="LOCAL-00001" summary="changed Compute_fit.py">
       <option name="closed" value="true" />
@@ -350,7 +351,15 @@
       <option name="project" value="LOCAL" />
       <updated>1713700910511</updated>
     </task>
-    <option name="localTasksCounter" value="17" />
+    <task id="LOCAL-00017" summary="Made changes to variables to return to main">
+      <option name="closed" value="true" />
+      <created>1713701325066</created>
+      <option name="number" value="00017" />
+      <option name="presentableId" value="LOCAL-00017" />
+      <option name="project" value="LOCAL" />
+      <updated>1713701325066</updated>
+    </task>
+    <option name="localTasksCounter" value="18" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -369,7 +378,8 @@
     <MESSAGE value="Made changes to the data model values to fit the data and also added Decision_Tress.py and updated the fake_data.xlsx and values of Engineering_data.xlsx" />
     <MESSAGE value="Made changes to Decision_Tress.py to add validation and data_model.py to fit to our needs." />
     <MESSAGE value="Made changes to Decision_Tress.py to remove the cycle of import error ." />
-    <option name="LAST_COMMIT_MESSAGE" value="Made changes to Decision_Tress.py to remove the cycle of import error ." />
+    <MESSAGE value="Made changes to variables to return to main" />
+    <option name="LAST_COMMIT_MESSAGE" value="Made changes to variables to return to main" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$create_fake_data.coverage" NAME="create_fake_data Coverage Results" MODIFIED="1713693726278" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
