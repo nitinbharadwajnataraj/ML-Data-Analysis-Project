@@ -12,6 +12,7 @@ from Decision_Tress import Decision_Tress
 st.set_page_config(layout="wide")
 
 
+
 def color_code(val):
     if val == 'OK':
         color = 'rgba(0, 255, 0, 0.3)'
