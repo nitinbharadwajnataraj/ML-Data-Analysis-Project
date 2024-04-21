@@ -4,11 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="54c727bd-5502-4d94-92e6-ef0722eaca1d" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_06_04_2024_11_04_[Changes]/shelved.patch" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Checkout_at_06_04_2024_11_04__Changes_.xml" beforeDir="false" />
+    <list default="true" id="54c727bd-5502-4d94-92e6-ef0722eaca1d" name="Changes" comment="Made changes to the UI accordingly">
+      <change afterPath="$PROJECT_DIR$/Decision_Tress.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app.py" beforeDir="false" afterPath="$PROJECT_DIR$/app.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Engineering_data.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/Engineering_data.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fake_data.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/fake_data.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -23,7 +25,15 @@
     </option>
   </component>
   <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="master" />
+      </map>
+    </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GithubDefaultAccount">
+    <option name="defaultAccountId" value="517ed4f1-9889-4ab5-9540-d367fe4e53f3" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 7
@@ -37,12 +47,14 @@
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
     "Python.Compute_fit.executor": "Run",
+    "Python.Decision_Tress.executor": "Run",
     "Python.create_fake_data.executor": "Run",
     "Python.main.executor": "Run",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "setty__new__branch",
+    "git-widget-placeholder": "nitin",
     "ignore.virus.scanning.warn.message": "true",
+    "last_opened_file_path": "C:/Users/nitin/OneDrive/Desktop/OVGU/ML-Project/Clusters4Operators",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -52,7 +64,7 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
-  <component name="RunManager" selected="Python.Compute_fit">
+  <component name="RunManager" selected="Python.Decision_Tress">
     <configuration name="Compute_fit" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ML_Stator_Hairline_Project" />
       <option name="ENV_FILES" value="" />
@@ -68,6 +80,29 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Compute_fit.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="Decision_Tress" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="ML_Stator_Hairline_Project" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/Decision_Tress.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -124,8 +159,9 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.Compute_fit" />
+        <item itemvalue="Python.Decision_Tress" />
         <item itemvalue="Python.create_fake_data" />
+        <item itemvalue="Python.Compute_fit" />
       </list>
     </recent_temporary>
   </component>
@@ -146,16 +182,149 @@
       <updated>1710952482276</updated>
       <workItem from="1710952488034" duration="1729000" />
       <workItem from="1711637649827" duration="21285000" />
-      <workItem from="1711793579912" duration="499000" />
+      <workItem from="1711793579912" duration="12415000" />
+      <workItem from="1711807996403" duration="46000" />
+      <workItem from="1712145482185" duration="613000" />
+      <workItem from="1712393847203" duration="453000" />
+      <workItem from="1712394321678" duration="14181000" />
+      <workItem from="1712669822643" duration="8029000" />
+      <workItem from="1712837522683" duration="613000" />
+      <workItem from="1713015571159" duration="7414000" />
+      <workItem from="1713099377988" duration="197000" />
+      <workItem from="1713099585251" duration="17857000" />
+      <workItem from="1713181765733" duration="266000" />
+      <workItem from="1713185752780" duration="2000" />
+      <workItem from="1713210357088" duration="263000" />
+      <workItem from="1713210637644" duration="1022000" />
+      <workItem from="1713214233369" duration="1631000" />
+      <workItem from="1713525109522" duration="6169000" />
     </task>
+    <task id="LOCAL-00001" summary="changed Compute_fit.py">
+      <option name="closed" value="true" />
+      <created>1711797527397</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1711797527397</updated>
+    </task>
+    <task id="LOCAL-00002" summary="Added lines for scatter plot in main.py">
+      <option name="closed" value="true" />
+      <created>1711802653203</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1711802653203</updated>
+    </task>
+    <task id="LOCAL-00003" summary="Added lines for scatter plot in main.py">
+      <option name="closed" value="true" />
+      <created>1711804881713</created>
+      <option name="number" value="00003" />
+      <option name="presentableId" value="LOCAL-00003" />
+      <option name="project" value="LOCAL" />
+      <updated>1711804881713</updated>
+    </task>
+    <task id="LOCAL-00004" summary="Added lines for scatter plot in main.py">
+      <option name="closed" value="true" />
+      <created>1712409725385</created>
+      <option name="number" value="00004" />
+      <option name="presentableId" value="LOCAL-00004" />
+      <option name="project" value="LOCAL" />
+      <updated>1712409725386</updated>
+    </task>
+    <task id="LOCAL-00005" summary=" Added k-means in main.py">
+      <option name="closed" value="true" />
+      <created>1712671737953</created>
+      <option name="number" value="00005" />
+      <option name="presentableId" value="LOCAL-00005" />
+      <option name="project" value="LOCAL" />
+      <updated>1712671737953</updated>
+    </task>
+    <task id="LOCAL-00006" summary=" Added k-means in main.py">
+      <option name="closed" value="true" />
+      <created>1712671778921</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1712671778921</updated>
+    </task>
+    <task id="LOCAL-00007" summary="Added UI elements to main.py">
+      <option name="closed" value="true" />
+      <created>1712677522968</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1712677522968</updated>
+    </task>
+    <task id="LOCAL-00008" summary="Added chart and color and made the dataset static">
+      <option name="closed" value="true" />
+      <created>1713100566709</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1713100566709</updated>
+    </task>
+    <task id="LOCAL-00009" summary="Added chart and color and made the dataset static">
+      <option name="closed" value="true" />
+      <created>1713102804858</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1713102804858</updated>
+    </task>
+    <task id="LOCAL-00010" summary="Added fake_data.xlxs as a static file">
+      <option name="closed" value="true" />
+      <created>1713103069763</created>
+      <option name="number" value="00010" />
+      <option name="presentableId" value="LOCAL-00010" />
+      <option name="project" value="LOCAL" />
+      <updated>1713103069763</updated>
+    </task>
+    <task id="LOCAL-00011" summary="Added Kmeans and DBscan to main and also added visualisations for clustering">
+      <option name="closed" value="true" />
+      <created>1713118583648</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1713118583648</updated>
+    </task>
+    <task id="LOCAL-00012" summary=".">
+      <option name="closed" value="true" />
+      <created>1713181890413</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1713181890414</updated>
+    </task>
+    <task id="LOCAL-00013" summary="Made changes to the UI accordingly">
+      <option name="closed" value="true" />
+      <created>1713215273283</created>
+      <option name="number" value="00013" />
+      <option name="presentableId" value="LOCAL-00013" />
+      <option name="project" value="LOCAL" />
+      <updated>1713215273283</updated>
+    </task>
+    <option name="localTasksCounter" value="14" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
   </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="changed Compute_fit.py" />
+    <MESSAGE value="Added lines for scatter plot in main.py" />
+    <MESSAGE value=" Added k-means in main.py" />
+    <MESSAGE value="Added UI elements to main.py" />
+    <MESSAGE value="Added chart and color and made the dataset static" />
+    <MESSAGE value="Added fake_data.xlxs as a static file" />
+    <MESSAGE value="Added Kmeans and DBscan to main and also added visualisations for clustering" />
+    <MESSAGE value="." />
+    <MESSAGE value="Made changes to the UI accordingly" />
+    <option name="LAST_COMMIT_MESSAGE" value="Made changes to the UI accordingly" />
+  </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$create_fake_data.coverage" NAME="create_fake_data Coverage Results" MODIFIED="1711642715791" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$Compute_fit.coverage" NAME="Compute_fit Coverage Results" MODIFIED="1711664988296" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$create_fake_data.coverage" NAME="create_fake_data Coverage Results" MODIFIED="1713529856935" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$Compute_fit.coverage" NAME="Compute_fit Coverage Results" MODIFIED="1711796983528" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$Decision_Tress.coverage" NAME="Decision_Tress Coverage Results" MODIFIED="1713530917402" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$main.coverage" NAME="main Coverage Results" MODIFIED="1711651733731" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>
