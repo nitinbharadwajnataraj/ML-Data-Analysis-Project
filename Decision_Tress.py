@@ -1,12 +1,8 @@
 import pandas as pd
-from altair.utils.display import RendererRegistry
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier, plot_tree
 from sklearn.metrics import confusion_matrix, accuracy_score, classification_report, precision_score, recall_score
-import matplotlib.pyplot as plt
-import matplotlib.pyplot as plt
-from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.tree import DecisionTreeClassifier
 
 def df_fitting_and_evaluation():
     df = pd.read_excel("fake_data.xlsx")
@@ -65,10 +61,7 @@ def Decision_Tress():
     # Convert class names to strings
     class_names = df['fitting_group_encoded'].unique().astype(str)
 
-    # Visualize the decision tree
-    plt.figure(figsize=(20, 10))
-    plot_tree(dtc, feature_names=X.columns, class_names=class_names, filled=True)
-    plt.show()
+
 
     #This is Validation
     y_pred_val = dtc.predict(x_val)
