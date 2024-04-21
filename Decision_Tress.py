@@ -1,13 +1,32 @@
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
-from main import df_fitting_and_evaluation
 from sklearn.model_selection import train_test_split
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.metrics import confusion_matrix, accuracy_score
 from sklearn.metrics import classification_report
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeClassifier, plot_tree
 
+def df_fitting_and_evaluation():
+    df = pd.read_excel("fake_data.xlsx")
+    df["fitting_distance"] = df["box_hole_diameter"] - df["cylinder_diameter"]
+
+    # Using & instead of 'and'
+    condition1 = (df["fitting_distance"] <= 1) & (df["fitting_distance"] >= -1)
+    condition2 = (df["fitting_distance"] > 1)
+
+    # Assigning values based on conditions
+    df.loc[condition1, "Evaluation"] = 'OK'
+    df.loc[condition1, "fitting_group"] = 'Transition'
+    df.loc[condition2, "Evaluation"] = 'NOK'
+    df.loc[condition2, "fitting_group"] = 'Clearance'
+    df.loc[~(condition1 | condition2), "Evaluation"] = 'NOK'
+    df.loc[~(condition1 | condition2), "fitting_group"] = 'Excess'
+
+    return df
+from sklearn import tree
 def prepare_DT_df():
-    df, style_df = df_fitting_and_evaluation()
+    df= df_fitting_and_evaluation()
     df.drop(columns=['ID', 'Evaluation'])
     # Initialize LabelEncoder
     label_encoder = LabelEncoder()
@@ -81,6 +100,16 @@ def Decision_Tress():
 
     features = pd.DataFrame(dtc.feature_importances_, index=X.columns)
     print(features.head(6))
+
+    # Visualization of the Decision Tree
+    #text_representation = tree.export_text(dtc)
+    #print(text_representation)
+    # with open("decistion_tree.log", "w") as fout:
+    #     fout.write(text_representation)
+
+    # fig = plt.figure(figsize=(25, 20))
+    # _ = tree.plot_tree(dtc, feature_names=X.columns, filled=True)
+    #plt.show()
 
 Decision_Tress()
 
