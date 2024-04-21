@@ -4,13 +4,10 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="54c727bd-5502-4d94-92e6-ef0722eaca1d" name="Changes" comment="Made changes to the data model values to fit the data and also added Decision_Tress.py and updated the fake_data.xlsx and values of Engineering_data.xlsx">
-      <change afterPath="$PROJECT_DIR$/neural_network.py" afterDir="false" />
+    <list default="true" id="54c727bd-5502-4d94-92e6-ef0722eaca1d" name="Changes" comment="Made changes to Decision_Tress.py to add validation and data_model.py to fit to our needs.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Decision_Tress.py" beforeDir="false" afterPath="$PROJECT_DIR$/Decision_Tress.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/create_fake_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/create_fake_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fake_data.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/fake_data.xlsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -225,7 +222,7 @@
       <workItem from="1713525109522" duration="7183000" />
       <workItem from="1713606700670" duration="180000" />
       <workItem from="1713626518758" duration="1538000" />
-      <workItem from="1713691282780" duration="5727000" />
+      <workItem from="1713691282780" duration="8768000" />
     </task>
     <task id="LOCAL-00001" summary="changed Compute_fit.py">
       <option name="closed" value="true" />
@@ -339,7 +336,15 @@
       <option name="project" value="LOCAL" />
       <updated>1713531709878</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Made changes to Decision_Tress.py to add validation and data_model.py to fit to our needs.">
+      <option name="closed" value="true" />
+      <created>1713697173102</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1713697173102</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -356,12 +361,13 @@
     <MESSAGE value="." />
     <MESSAGE value="Made changes to the UI accordingly" />
     <MESSAGE value="Made changes to the data model values to fit the data and also added Decision_Tress.py and updated the fake_data.xlsx and values of Engineering_data.xlsx" />
-    <option name="LAST_COMMIT_MESSAGE" value="Made changes to the data model values to fit the data and also added Decision_Tress.py and updated the fake_data.xlsx and values of Engineering_data.xlsx" />
+    <MESSAGE value="Made changes to Decision_Tress.py to add validation and data_model.py to fit to our needs." />
+    <option name="LAST_COMMIT_MESSAGE" value="Made changes to Decision_Tress.py to add validation and data_model.py to fit to our needs." />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$create_fake_data.coverage" NAME="create_fake_data Coverage Results" MODIFIED="1713693726278" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$Compute_fit.coverage" NAME="Compute_fit Coverage Results" MODIFIED="1711796983528" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$Decision_Tress.coverage" NAME="Decision_Tress Coverage Results" MODIFIED="1713696940607" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$Decision_Tress.coverage" NAME="Decision_Tress Coverage Results" MODIFIED="1713700371718" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$main.coverage" NAME="main Coverage Results" MODIFIED="1711651733731" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$neural_network.coverage" NAME="neural_network Coverage Results" MODIFIED="1713694131144" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>

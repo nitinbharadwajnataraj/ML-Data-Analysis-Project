@@ -11,6 +11,7 @@ from data_model import data_model
 from create_fake_data import create_fake_dataset
 from Compute_fit import compute_fit, count_yes_no
 from clustering.k_means import perform_kmeans
+from Decision_Tress import Decision_Tress
 
 st.set_page_config(layout="wide")
 
@@ -384,11 +385,13 @@ def fitting_group_visualisation_dbscan():
     # Show the plot
     st.plotly_chart(fig)
 
+def decision_tree_viz():
+    Decision_Tress()
 
 def main():
     st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
 
-    sections = {'Bar-Chart': 'Bar-Chart', 'Plot': 'Plot', 'K-Means': 'k-means'}
+    sections = {'Bar-Chart': 'Bar-Chart', 'Plot': 'Plot', 'K-Means': 'k-means', 'Decision Tree': 'Decision Tree'}
 
     st.sidebar.title('PMV4')
     selected_nav = st.sidebar.selectbox("Navigate to", list(sections.keys()), key='navigation')
@@ -416,6 +419,8 @@ def main():
         fitting_group_visualisation()
         fitting_group_visualisation_dbscan()
         kmeans()
+    elif nav == "Decision Tree":
+        decision_tree_viz()
 
 
 if __name__ == "__main__":
