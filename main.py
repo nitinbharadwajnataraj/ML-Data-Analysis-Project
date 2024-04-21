@@ -1,19 +1,16 @@
 import plotly.figure_factory as ff
-import pandas
 import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 from sklearn.cluster import KMeans, DBSCAN
-from sklearn.metrics import confusion_matrix
-
 from data_model import data_model
-from create_fake_data import create_fake_dataset
 from Compute_fit import compute_fit, count_yes_no
 from clustering.k_means import perform_kmeans
 from Decision_Tress import Decision_Tress
 st.set_page_config(layout="wide")
+
 
 
 def color_code(val):
