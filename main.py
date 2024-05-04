@@ -384,7 +384,6 @@ def fitting_group_visualisation_dbscan():
     st.plotly_chart(fig)
 
 def decision_tree_viz():
-    preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test = Decision_Tress()
     tab0, tab1, tab2, tab4 = st.tabs(["Prediction","Confusion-Matrix", "Evaluation-Metrics", "Decision Tree Visualization"])
     preci_value = round(preci_value, 4)
     recall_value = round(recall_value, 4)
