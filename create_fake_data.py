@@ -27,6 +27,7 @@ def generate_dataset(num_rows, data_model):
         dfs.append(df)
     # Merge all dataframes
     df_final = ft.reduce(lambda left, right: pd.merge(left, right, on='ID'), dfs)
+    df_final["Material_seller"] = [random.randint(0, 2) for _ in range(len(df_final))]
     return df_final
 
 def create_fake_dataset():
@@ -38,4 +39,4 @@ fake_data = create_fake_dataset()
 # path = os.path.join(os.path.expanduser('~'),'Downloads')
 # file_path = os.path.join(path, 'fake_data.csv')
 # fake_data.to_csv(file_path, index=False)
-# print(fake_data)
+# print(fake_data

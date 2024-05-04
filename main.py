@@ -9,6 +9,10 @@ from data_model import data_model
 from Compute_fit import compute_fit, count_yes_no
 from clustering.k_means import perform_kmeans
 from Decision_Tress import Decision_Tress
+
+import joblib
+
+
 st.set_page_config(layout="wide")
 
 
@@ -384,6 +388,207 @@ def fitting_group_visualisation_dbscan():
 
 def decision_tree_viz():
     preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test = Decision_Tress()
+    tab0, tab1, tab2, tab4 = st.tabs(["Prediction","Confusion-Matrix", "Evaluation-Metrics", "Decision Tree Visualization"])
+    preci_value = round(preci_value, 4)
+    recall_value = round(recall_value, 4)
+    accuracy_value = round(accuracy_value, 4)
+    with tab0:
+        df_input_val = input_val()
+        if st.button('Make Prediction'):
+            prediction = predict_input(df_input_val)
+            display_prediction(prediction)
+    with tab1:
+        # Create a DataFrame with label mappings
+        # confusion_matrix_df = pd.DataFrame(confusion_matrix_test, index=['Transition', 'Excess', 'Clearance'],
+        #                                columns=['Transition', 'Excess', 'Clearance'])
+        confusion_matrix_df = pd.DataFrame(confusion_matrix_test, index=['OK', 'NOK'],
+                                           columns=['OK', 'NOK'])
+        # Define the labels for rows and columns
+        labels = ['OK', 'NOK']
+
+        # Create the confusion matrix plot using Plotly
+        fig = ff.create_annotated_heatmap(z=confusion_matrix_df.values, x=labels, y=labels, colorscale='Blues')
+
+        # Add title and axis labels
+        fig.update_layout(title='Confusion Matrix',
+                          xaxis=dict(title='Actual  Values'),
+                          yaxis=dict(title='Predicted Values'))
+
+        # Display the Plotly figure in Streamlit
+        st.plotly_chart(fig)
+        # confusion_matrix_df = pd.concat([pd.DataFrame(confusion_matrix_df)], axis=1)
+        with tab2:
+            st.header("Evaluation-Metrics")
+
+            # Accuracy Progress Bar
+            # Accuracy Progress Bar
+            accuracy_color = "#87CEEB"  # Pastel Blue
+            progress_text = f"<div class='progress-bar-text'>Accuracy Value</div>"
+            st.write(progress_text, unsafe_allow_html=True)
+            st.markdown("""
+                <style>
+                .progress-container.accuracy {
+                    position: relative;
+                    width: 100%;
+                    background-color: #f0f0f0;
+                    border-radius: 5px;
+                    padding: 2px;
+                }
+                .progress-bar.accuracy {
+                    position: relative;
+                    width: 0%;
+                    height: 30px;
+                    background-color: """ + accuracy_color + """;
+                    text-align: center;
+                    line-height: 30px;
+                    color: white;
+                    border-radius: 5px;
+                }
+                .progress-bar-text {
+                    position: absolute;
+                    top: 300%;
+                    left :7%;
+                    transform: translate(-50%, -50%);
+                
+                    color: black;  /* Change the color as needed */
+                }
+                </style>
+                """, unsafe_allow_html=True)
+
+            # Calculate percentage for Accuracy
+            percentage_accuracy = accuracy_value * 100
+            percentage_accuracy = round(percentage_accuracy, 2)
+            # Display Accuracy progress bar
+            st.markdown(f"""
+                <div class="progress-container accuracy">
+                    <div class="progress-bar accuracy" style="width: {percentage_accuracy}%;">
+                        {percentage_accuracy}%
+                    </div>
+                </div>
+                """, unsafe_allow_html=True)
+
+            # Precision Progress Bar
+            precision_color = "#FFD700"  # Pastel Yellow
+            progress_text = f"<div style='position:relative;padding-top: 10px;'>Precision Value</div>"
+            st.write(progress_text, unsafe_allow_html=True)
+            st.markdown("""
+                        <style>
+                        .progress-container.precision {
+                            width: 100%;
+                            background-color: #f0f0f0;
+                            border-radius: 5px;
+                            padding: 2px; /* Increased padding for more space */
+                        }
+                        .progress-bar.precision {
+                            width: 0%;
+                            height: 30px;
+                            background-color: """ + precision_color + """;
+                            text-align: center;
+                            line-height: 30px;
+                            color: white;
+                            border-radius: 5px;
+                        }
+                        </style>
+                        """, unsafe_allow_html=True)
+
+            # Calculate percentage for Precision
+            percentage_preci = preci_value * 100
+            percentage_preci = round(percentage_preci, 2)
+            # Display Precision progress bar
+            st.markdown(f"""
+                        <div class="progress-container precision">
+                            <div class="progress-bar precision" style="width: {percentage_preci}%">
+                                {percentage_preci}%
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+            # Recall Progress Bar
+            recall_color = "#FFA07A"  # Pastel Salmon
+            progress_text = f"<div style='position:relative;padding-top: 10px;'>Recall Value</div>"
+
+            st.write(progress_text, unsafe_allow_html=True)
+            st.markdown("""
+                        <style>
+                        .progress-container.recall {
+                            width: 100%;
+                            background-color: #f0f0f0;
+                            border-radius: 5px;
+                            padding: 2px; /* Increased padding for more space */
+                        }
+                        .progress-bar.recall {
+                            width: 0%;
+                            height: 30px;
+                            background-color: """ + recall_color + """;
+                            text-align: center;
+                            line-height: 30px;
+                            color: white;
+                            border-radius: 5px;
+                        }
+                        </style>
+                        """, unsafe_allow_html=True)
+
+            # Calculate percentage for Recall
+            percentage_recall = recall_value * 100
+            percentage_recall = round(percentage_recall, 2)
+            # Display Recall progress bar
+            st.markdown(f"""
+                        <div class="progress-container recall">
+                            <div class="progress-bar recall" style="width: {percentage_recall}%">
+                                {percentage_recall}%
+                            </div>
+                        </div>
+                        """, unsafe_allow_html=True)
+
+        # Accuracy Progress Bar
+    with tab4:
+            st.image("decision_tree.png")
+
+def load_model():
+    # Load the saved decision tree model
+    decision_tree_model = joblib.load('decision_tree_model.joblib')
+    return decision_tree_model
+
+def input_val():
+    st.title("Input Floating Numbers")
+
+    # Input fields for 7 floating-point numbers
+    number1 = st.number_input("Enter Box hole diameter", step=0.1, format="%.2f")
+    number2 = st.number_input("Enter Box hole depth", step=0.1, format="%.2f")
+    number3 = st.number_input("Enter Cylinder diameter", step=0.1, format="%.2f")
+    number4 = st.number_input("Enter Cylinder height", step=0.1, format="%.2f")
+    number5 = st.number_input("Enter Wire diameter", step=0.1, format="%.2f")
+    number6 = st.number_input("Enter Bed distance", step=0.1, format="%.2f")
+    number7 = st.number_input("Enter Material Supplier", step=0.1, format="%.2f")
+
+    df_input_val = pd.DataFrame([[number1, number2, number3, number4, number5, number6, number7]])
+
+    return df_input_val
+
+def predict_input(df_input_val):
+    decision_tree_model = load_model()
+
+    # Make predictions on user's input data
+    predictions = decision_tree_model.predict(df_input_val)
+
+    return predictions
+
+
+def display_prediction(predictions):
+    if predictions == 0:
+        predictions_val = "NOK"
+        color = "red"
+    else:
+        predictions_val = "OK"
+        color = "green"
+
+    predict = "Prediction: "
+    # st.write("Prediction is ",
+    #          unsafe_allow_html=True,
+    #          )
+    # Adding some color to the output for better visualization
+    st.markdown(f' <p  style="color:{color};font-size:20px;">{predict}{predictions_val}</p>', unsafe_allow_html=True)
+
     tab1, tab2 = st.tabs(["Confusion-Matrix", "Evaluation-Metrics"])
     preci_value = round(preci_value, 4)
     recall_value = round(recall_value, 4)
@@ -538,6 +743,8 @@ def decision_tree_viz():
 def main():
     st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
 
+    sections = {'Bar-Chart': 'Bar-Chart', 'Plot': 'Plot', 'K-Means': 'k-means', 'Decision Tree':'Decision Tree'}
+
     sections = {'Bar-Chart': 'Bar-Chart', 'Plot': 'Plot', 'K-Means': 'k-means', 'Decision-Trees':'Decision-Trees'}
 
     st.sidebar.title('PMV4')
@@ -568,6 +775,7 @@ def main():
         kmeans()
     elif nav == 'Decision-Trees':
         decision_tree_viz()
+
 
 
 
