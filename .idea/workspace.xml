@@ -5,8 +5,17 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="54c727bd-5502-4d94-92e6-ef0722eaca1d" name="Changes" comment="Committed the chnages for Confusion matrix &amp; Evaluation Metrics for Decision Trees">
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_04_2024_09_53_[Changes]1/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_04_2024_09_53__Changes_1.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_04_2024_13_17_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_04_2024_13_17__Changes_.xml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_04_2024_14_02_[Changes]/shelved.patch" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_04_2024_14_02__Changes_.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Decision_Tress.py" beforeDir="false" afterPath="$PROJECT_DIR$/Decision_Tress.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/create_fake_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/create_fake_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/data_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fake_data.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/fake_data.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -38,26 +47,26 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "Python.Compute_fit.executor": "Run",
-    "Python.Decision_Tress.executor": "Run",
-    "Python.create_fake_data.executor": "Run",
-    "Python.main.executor": "Run",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "git-widget-placeholder": "setty__new__branch",
-    "ignore.virus.scanning.warn.message": "true",
-    "last_opened_file_path": "C:/Users/nitin/OneDrive/Desktop/OVGU/ML-Project/Clusters4Operators",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "org.jetbrains.plugins.github.ui.GithubSettingsConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Python.Compute_fit.executor&quot;: &quot;Run&quot;,
+    &quot;Python.Decision_Tress.executor&quot;: &quot;Run&quot;,
+    &quot;Python.create_fake_data.executor&quot;: &quot;Run&quot;,
+    &quot;Python.main.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;setty__new__branch&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;C:/Users/nitin/OneDrive/Desktop/OVGU/ML-Project/Clusters4Operators&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;org.jetbrains.plugins.github.ui.GithubSettingsConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RunManager" selected="Python.Decision_Tress">
     <configuration name="Compute_fit" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ML_Stator_Hairline_Project" />
@@ -192,6 +201,7 @@
       <workItem from="1713210637644" duration="1022000" />
       <workItem from="1713214233369" duration="1631000" />
       <workItem from="1713525109522" duration="6169000" />
+      <workItem from="1714813371479" duration="11028000" />
     </task>
     <task id="LOCAL-00001" summary="changed Compute_fit.py">
       <option name="closed" value="true" />
@@ -305,7 +315,15 @@
       <option name="project" value="LOCAL" />
       <updated>1713707658746</updated>
     </task>
-    <option name="localTasksCounter" value="15" />
+    <task id="LOCAL-00015" summary="Committed the chnages for Confusion matrix &amp; Evaluation Metrics for Decision Trees">
+      <option name="closed" value="true" />
+      <created>1713709219931</created>
+      <option name="number" value="00015" />
+      <option name="presentableId" value="LOCAL-00015" />
+      <option name="project" value="LOCAL" />
+      <updated>1713709219931</updated>
+    </task>
+    <option name="localTasksCounter" value="16" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -328,7 +346,8 @@
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$create_fake_data.coverage" NAME="create_fake_data Coverage Results" MODIFIED="1711642715791" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$Compute_fit.coverage" NAME="Compute_fit Coverage Results" MODIFIED="1711664988296" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$Decision_Tress.coverage" NAME="Decision_Tress Coverage Results" MODIFIED="1713530917402" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ML_Data_Analysis_Project$create_fake_data.coverage" NAME="create_fake_data Coverage Results" MODIFIED="1714816320850" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$main.coverage" NAME="main Coverage Results" MODIFIED="1711651733731" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/ML_Data_Analysis_Project$Decision_Tress.coverage" NAME="Decision_Tress Coverage Results" MODIFIED="1713706585033" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ML_Data_Analysis_Project$Decision_Tress.coverage" NAME="Decision_Tress Coverage Results" MODIFIED="1714821243017" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

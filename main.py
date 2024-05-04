@@ -9,6 +9,7 @@ from data_model import data_model
 from Compute_fit import compute_fit, count_yes_no
 from clustering.k_means import perform_kmeans
 from Decision_Tress import Decision_Tress
+
 st.set_page_config(layout="wide")
 
 
@@ -390,11 +391,12 @@ def decision_tree_viz():
 
     with tab1:
         # Create a DataFrame with label mappings
-        confusion_matrix_df = pd.DataFrame(confusion_matrix_test, index=['Transition', 'Excess', 'Clearance'],
-                                       columns=['Transition', 'Excess', 'Clearance'])
-
+        # confusion_matrix_df = pd.DataFrame(confusion_matrix_test, index=['Transition', 'Excess', 'Clearance'],
+        #                                columns=['Transition', 'Excess', 'Clearance'])
+        confusion_matrix_df = pd.DataFrame(confusion_matrix_test, index=['OK', 'NOK'],
+                                           columns=['OK', 'NOK'])
         # Define the labels for rows and columns
-        labels = ['Clearance', 'Excess', 'Transition']
+        labels = ['OK', 'NOK']
 
         # Create the confusion matrix plot using Plotly
         fig = ff.create_annotated_heatmap(z=confusion_matrix_df.values, x=labels, y=labels, colorscale='Blues')
@@ -531,13 +533,37 @@ def decision_tree_viz():
                         """, unsafe_allow_html=True)
 
         # Accuracy Progress Bar
+def input_val():
+
+    st.title("Input Floating Numbers")
+
+    # Input fields for 7 floating-point numbers
+    number1 = st.number_input("Enter Box hole diameter", step=0.1, format="%.2f")
+    number2 = st.number_input("Enter Box hole depth", step=0.1, format="%.2f")
+    number3 = st.number_input("Enter Cylinder diameter", step=0.1, format="%.2f")
+    number4 = st.number_input("Enter Cylinder height", step=0.1, format="%.2f")
+    number5 = st.number_input("Enter Wire diameter", step=0.1, format="%.2f")
+    number6 = st.number_input("Enter Bed distance", step=0.1, format="%.2f")
+    number7 = st.number_input("Enter Material Supplier", step=0.1, format="%.2f")
+
+    df_input_val = pd.DataFrame([[number1, number2, number3, number4, number5, number6, number7]])
+    prediction = dtc.predict(df_input_val)
+    st.write(prediction)
 
 
-    # st.write(preci_value, recall_value, accuracy_value)
+    # Displaying the inputs
+    # st.write("Number 1:", number1)
+    # st.write("Number 2:", number2)
+    # st.write("Number 3:", number3)
+    # st.write("Number 4:", number4)
+    # st.write("Number 5:", number5)
+    # st.write("Number 6:", number6)
+    # st.write("Number 7:", number7)
+
 def main():
     st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
 
-    sections = {'Bar-Chart': 'Bar-Chart', 'Plot': 'Plot', 'K-Means': 'k-means', 'Decision-Trees':'Decision-Trees'}
+    sections = {'Bar-Chart': 'Bar-Chart', 'Plot': 'Plot', 'K-Means': 'k-means', 'Classification Test':'Classification Test'}
 
     st.sidebar.title('PMV4')
     selected_nav = st.sidebar.selectbox("Navigate to", list(sections.keys()), key='navigation')
@@ -565,8 +591,9 @@ def main():
         fitting_group_visualisation()
         fitting_group_visualisation_dbscan()
         kmeans()
-    elif nav == 'Decision-Trees':
+    elif nav == 'Classification Test':
         decision_tree_viz()
+        # input_val()
 
 
 
