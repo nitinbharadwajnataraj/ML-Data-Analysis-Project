@@ -547,8 +547,7 @@ def input_val():
     number7 = st.number_input("Enter Material Supplier", step=0.1, format="%.2f")
 
     df_input_val = pd.DataFrame([[number1, number2, number3, number4, number5, number6, number7]])
-    prediction = dtc.predict(df_input_val)
-    st.write(prediction)
+
 
 
     # Displaying the inputs
