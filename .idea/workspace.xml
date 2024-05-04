@@ -4,10 +4,11 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="54c727bd-5502-4d94-92e6-ef0722eaca1d" name="Changes" comment="Committed the chnages for Confusion matrix &amp; Evaluation Metrics for Decision Trees">
+    <list default="true" id="54c727bd-5502-4d94-92e6-ef0722eaca1d" name="Changes" comment="added unversioned files too g">
+      <change afterPath="$PROJECT_DIR$/decision_tree.png" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/decision_tree_model.joblib" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Decision_Tress.py" beforeDir="false" afterPath="$PROJECT_DIR$/Decision_Tress.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/create_fake_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/create_fake_data.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -192,7 +193,7 @@
       <workItem from="1713210637644" duration="1022000" />
       <workItem from="1713214233369" duration="1631000" />
       <workItem from="1713525109522" duration="6169000" />
-      <workItem from="1714813371479" duration="14080000" />
+      <workItem from="1714813371479" duration="15182000" />
     </task>
     <task id="LOCAL-00001" summary="changed Compute_fit.py">
       <option name="closed" value="true" />
@@ -330,7 +331,15 @@
       <option name="project" value="LOCAL" />
       <updated>1714830234614</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Made changes to Decision_Tress.py and main to accomodate predictions and extended data model.">
+      <option name="closed" value="true" />
+      <created>1714833281146</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1714833281146</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -347,7 +356,10 @@
     <MESSAGE value="." />
     <MESSAGE value="Made changes to the UI accordingly" />
     <MESSAGE value="Committed the chnages for Confusion matrix &amp; Evaluation Metrics for Decision Trees" />
-    <option name="LAST_COMMIT_MESSAGE" value="Committed the chnages for Confusion matrix &amp; Evaluation Metrics for Decision Trees" />
+    <MESSAGE value="Made changes to Decision_Tress.py and main to accomodate predictions and extended data model." />
+    <MESSAGE value="added unversioned files too" />
+    <MESSAGE value="added unversioned files too g" />
+    <option name="LAST_COMMIT_MESSAGE" value="added unversioned files too g" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$create_fake_data.coverage" NAME="create_fake_data Coverage Results" MODIFIED="1711642715791" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
