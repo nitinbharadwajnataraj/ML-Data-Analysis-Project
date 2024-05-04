@@ -75,7 +75,7 @@ def kmeans_main():
         fig.update_layout(title=f"Cluster Centers for {column}",
                           xaxis_title="Cluster Index",
                           yaxis_title=column)
-        # Add the figure to the list
+        # Add the figure to the lis
         figures.append(fig)
 
     # Display the figures in a row format
