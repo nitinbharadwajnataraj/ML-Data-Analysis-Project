@@ -31,7 +31,7 @@ def perform_kmeans(data, n_clusters=None):
 
     cluster_centers_df = pd.DataFrame(cluster_centers,
                                       columns=[f'Cluster Center {i + 1}' for i in range(cluster_centers.shape[1])])
-    # Round the values in the DataFrame to 2 decimals
+    # Round the values in the DataFrame to 2 decimal
     cluster_centers_rounded = cluster_centers_df.round(2)
     cluster_centers_rounded_list = cluster_centers_rounded.values.tolist()
 
