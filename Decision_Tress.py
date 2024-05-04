@@ -5,7 +5,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, accuracy_score, classification_report, precision_score, recall_score
 from sklearn.tree import DecisionTreeClassifier
 from sklearn import tree
-
+import joblib
 
 def df_fitting_and_evaluation():
     df = pd.read_excel("fake_data.xlsx")
@@ -75,6 +75,8 @@ def Decision_Tress():
     dtc = DecisionTreeClassifier(criterion='entropy', max_depth=6)
     dtc.fit(x_main, y_main)
 
+    # Save the model
+    joblib.dump(dtc, 'decision_tree_model.joblib')
     # Convert class names to strings
     # class_names = df['evaluation_encoded'].unique().astype(str)
 

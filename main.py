@@ -9,6 +9,7 @@ from data_model import data_model
 from Compute_fit import compute_fit, count_yes_no
 from clustering.k_means import perform_kmeans
 from Decision_Tress import Decision_Tress
+import joblib
 
 st.set_page_config(layout="wide")
 
@@ -384,11 +385,15 @@ def fitting_group_visualisation_dbscan():
 
 def decision_tree_viz():
     preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test = Decision_Tress()
-    tab1, tab2 = st.tabs(["Confusion-Matrix", "Evaluation-Metrics"])
+    tab0, tab1, tab2, tab4 = st.tabs(["Prediction","Confusion-Matrix", "Evaluation-Metrics", "Decision Tree Visualization"])
     preci_value = round(preci_value, 4)
     recall_value = round(recall_value, 4)
     accuracy_value = round(accuracy_value, 4)
-
+    with tab0:
+        df_input_val = input_val()
+        if st.button('Make Prediction'):
+            prediction = predict_input(df_input_val)
+            display_prediction(prediction)
     with tab1:
         # Create a DataFrame with label mappings
         # confusion_matrix_df = pd.DataFrame(confusion_matrix_test, index=['Transition', 'Excess', 'Clearance'],
@@ -533,8 +538,15 @@ def decision_tree_viz():
                         """, unsafe_allow_html=True)
 
         # Accuracy Progress Bar
-def input_val():
+    with tab4:
+            st.image("decision_tree.png")
 
+def load_model():
+    # Load the saved decision tree model
+    decision_tree_model = joblib.load('decision_tree_model.joblib')
+    return decision_tree_model
+
+def input_val():
     st.title("Input Floating Numbers")
 
     # Input fields for 7 floating-point numbers
@@ -548,21 +560,36 @@ def input_val():
 
     df_input_val = pd.DataFrame([[number1, number2, number3, number4, number5, number6, number7]])
 
+    return df_input_val
+
+def predict_input(df_input_val):
+    decision_tree_model = load_model()
+
+    # Make predictions on user's input data
+    predictions = decision_tree_model.predict(df_input_val)
+
+    return predictions
 
 
-    # Displaying the inputs
-    # st.write("Number 1:", number1)
-    # st.write("Number 2:", number2)
-    # st.write("Number 3:", number3)
-    # st.write("Number 4:", number4)
-    # st.write("Number 5:", number5)
-    # st.write("Number 6:", number6)
-    # st.write("Number 7:", number7)
+def display_prediction(predictions):
+    if predictions == 0:
+        predictions_val = "NOK"
+        color = "red"
+    else:
+        predictions_val = "OK"
+        color = "green"
+
+    predict = "Prediction: "
+    # st.write("Prediction is ",
+    #          unsafe_allow_html=True,
+    #          )
+    # Adding some color to the output for better visualization
+    st.markdown(f' <p  style="color:{color};font-size:20px;">{predict}{predictions_val}</p>', unsafe_allow_html=True)
 
 def main():
     st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
 
-    sections = {'Bar-Chart': 'Bar-Chart', 'Plot': 'Plot', 'K-Means': 'k-means', 'Classification Test':'Classification Test'}
+    sections = {'Bar-Chart': 'Bar-Chart', 'Plot': 'Plot', 'K-Means': 'k-means', 'Decision Tree':'Decision Tree'}
 
     st.sidebar.title('PMV4')
     selected_nav = st.sidebar.selectbox("Navigate to", list(sections.keys()), key='navigation')
@@ -590,9 +617,10 @@ def main():
         fitting_group_visualisation()
         fitting_group_visualisation_dbscan()
         kmeans()
-    elif nav == 'Classification Test':
+    elif nav == 'Decision Tree':
         decision_tree_viz()
-        # input_val()
+
+
 
 
 
