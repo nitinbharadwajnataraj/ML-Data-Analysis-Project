@@ -1,9 +1,12 @@
 import plotly.figure_factory as ff
+from io import BytesIO
+from base64 import b64encode
 import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
+from streamlit_option_menu import option_menu
 from sklearn.cluster import KMeans, DBSCAN
 from data_model import data_model
 from Compute_fit import compute_fit, count_yes_no
@@ -12,7 +15,6 @@ from Decision_Tress import Decision_Tress
 import joblib
 
 st.set_page_config(layout="wide")
-
 
 def color_code(val):
     if val == 'OK':
@@ -26,6 +28,7 @@ def color_code(val):
     else:
         color = 'rgba(255, 165, 0, 0.3)'
     return f'background-color: {color}'
+
 
 def color_code2(val):
     if (val <= 1) and (val >= -1):
@@ -53,7 +56,7 @@ def df_fitting_and_evaluation():
     df.loc[~(condition1 | condition2), "Evaluation"] = 'NOK'
     df.loc[~(condition1 | condition2), "fitting_group"] = 'Excess'
 
-    styled_df = df.style.map(color_code, subset=['Evaluation', 'fitting_group' ])
+    styled_df = df.style.map(color_code, subset=['Evaluation', 'fitting_group'])
     styled_df = styled_df.map(color_code2, subset=['fitting_distance'])
 
     return df, styled_df
@@ -198,7 +201,7 @@ def kmeans():
     if "engineering_df" not in st.session_state:
         engineering_df = pd.read_excel("Engineering_data.xlsx")
         st.session_state["engineering_df"] = engineering_df
-        #st.write(fake_data)
+        # st.write(fake_data)
 
     st.header("Cluster Analysis", anchor=sections['Clusters 4 Operators'])
     df = pd.read_excel("fake_data.xlsx")
@@ -287,6 +290,7 @@ def kmeans():
 
     except ValueError as e:
         st.error("Please select atleast one column for clustering")
+
 
 def fitting_group_visualisation():
     st.header("Synthetic Data")
@@ -383,19 +387,94 @@ def fitting_group_visualisation_dbscan():
     # Show the plot
     st.plotly_chart(fig)
 
+
+MATERIAL_SUPPLIER_MAPPING = {
+    'Supplier_A': 0,
+    'Supplier_B': 1,
+    'Supplier_C': 2
+}
+
+
+def rename_dataframe_columns(df):
+    # Rename the columns to match the expected feature names
+    df = df.rename(columns={
+        'Box hole diameter': 'box_hole_diameter',
+        'Box hole depth': 'box_hole_depth',
+        'Cylinder diameter': 'cylinder_diameter',
+        'Cylinder height': 'cylinder_height',
+        'Wire diameter': 'wire_diameter',
+        'Bed distance': 'bed_distance',
+        'Material Supplier': 'Material_seller'
+    })
+    return df
+
 def decision_tree_viz():
     preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test = Decision_Tress()
-    tab0, tab1, tab2, tab4 = st.tabs(["Prediction","Confusion-Matrix", "Evaluation-Metrics", "Decision Tree Visualization"])
+    tab0, tab1, tab2, tab4 = st.tabs(
+        ["Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Decision Tree Visualization"])
     preci_value = round(preci_value, 4)
     recall_value = round(recall_value, 4)
     accuracy_value = round(accuracy_value, 4)
     with tab0:
-        df_input_val = input_val()
-        if st.button('Make Prediction'):
-            prediction = predict_input(df_input_val)
-            display_prediction(prediction)
+        option = st.radio("Select input method", ("Manual Input", "Upload Excel File"))
+
+        if option == "Manual Input":
+            with st.form("prediction_form"):
+                st.write("Enter the input values:")
+                number1 = st.number_input("Enter Box hole diameter", step=0.1, format="%.2f")
+                number2 = st.number_input("Enter Box hole depth", step=0.1, format="%.2f")
+                number3 = st.number_input("Enter Cylinder diameter", step=0.1, format="%.2f")
+                number4 = st.number_input("Enter Cylinder height", step=0.1, format="%.2f")
+                number5 = st.number_input("Enter Wire diameter", step=0.1, format="%.2f")
+                number6 = st.number_input("Enter Bed distance", step=0.1, format="%.2f")
+                material_supplier = st.selectbox("Select Material Supplier",
+                                                 options=list(MATERIAL_SUPPLIER_MAPPING.keys()))
+
+                submitted = st.form_submit_button("Make Prediction")
+                if submitted:
+                    material_supplier_value = MATERIAL_SUPPLIER_MAPPING[material_supplier]
+                    df_input_val = pd.DataFrame(
+                        [[number1, number2, number3, number4, number5, number6, material_supplier_value]],
+                        columns=['Box hole diameter', 'Box hole depth', 'Cylinder diameter',
+                                 'Cylinder height', 'Wire diameter', 'Bed distance', 'Material Supplier'])
+                    df_input_val = rename_dataframe_columns(df_input_val)
+                    prediction = predict_input(df_input_val)
+                    display_prediction(prediction)
+
+        elif option == "Upload Excel File":
+            uploaded_file = st.file_uploader("Upload an Excel or CSV file", type=["xlsx", "xls", "csv"])
+            if uploaded_file is not None:
+                file_ext = uploaded_file.name.split('.')[-1]
+                if file_ext.lower() in ['xlsx', 'xls']:
+                    df_input_val = pd.read_excel(uploaded_file)
+                elif file_ext.lower() == 'csv':
+                    df_input_val = pd.read_csv(uploaded_file)
+                else:
+                    st.error("Unsupported file format. Please upload an Excel (xlsx/xls) or CSV (csv) file.")
+                    return
+
+                if 'Material Supplier' in df_input_val.columns:
+                    df_input_val['Material Supplier'] = df_input_val['Material Supplier'].apply(
+                        lambda x: MATERIAL_SUPPLIER_MAPPING[x] if isinstance(x,
+                                                                             str) and x in MATERIAL_SUPPLIER_MAPPING else x
+                    )
+                    st.write("Data uploaded:")
+                    st.write(df_input_val)
+                if st.button("Make Prediction"):
+                    df_input_val = rename_dataframe_columns(df_input_val)
+                    predictions = predict_input(df_input_val)
+                    prediction_labels = ['NOK' if pred == 0 else 'OK' for pred in predictions]
+                    df_input_val['Prediction'] = prediction_labels
+                    df_input_val_styled = df_input_val.style.applymap(
+                        lambda x: 'color: green' if x == 'OK' else 'color: red', subset=['Prediction'])
+                    st.write("Predictions:")
+                    st.dataframe(df_input_val_styled)
+            else:
+                st.error("Please upload an Excel (xlsx/xls) or CSV (csv) file.")
+                # Provide a template for download
+                st.markdown(get_table_download_link(), unsafe_allow_html=True)
+
     with tab1:
-        # Create a DataFrame with label mappings
         # confusion_matrix_df = pd.DataFrame(confusion_matrix_test, index=['Transition', 'Excess', 'Clearance'],
         #                                columns=['Transition', 'Excess', 'Clearance'])
         confusion_matrix_df = pd.DataFrame(confusion_matrix_test, index=['OK', 'NOK'],
@@ -413,16 +492,17 @@ def decision_tree_viz():
 
         # Display the Plotly figure in Streamlit
         st.plotly_chart(fig)
-        # confusion_matrix_df = pd.concat([pd.DataFrame(confusion_matrix_df)], axis=1)
-        with tab2:
-            st.header("Evaluation-Metrics")
+    # confusion_matrix_df = pd.concat([pd.DataFrame(confusion_matrix_df)], axis=1)
 
-            # Accuracy Progress Bar
-            # Accuracy Progress Bar
-            accuracy_color = "#87CEEB"  # Pastel Blue
-            progress_text = f"<div class='progress-bar-text'>Accuracy Value</div>"
-            st.write(progress_text, unsafe_allow_html=True)
-            st.markdown("""
+    with tab2:
+        st.header("Evaluation-Metrics")
+
+        # Accuracy Progress Bar
+        # Accuracy Progress Bar
+        accuracy_color = "#87CEEB"  # Pastel Blue
+        progress_text = f"<div class='progress-bar-text'>Accuracy Value</div>"
+        st.write(progress_text, unsafe_allow_html=True)
+        st.markdown("""
                 <style>
                 .progress-container.accuracy {
                     position: relative;
@@ -452,11 +532,11 @@ def decision_tree_viz():
                 </style>
                 """, unsafe_allow_html=True)
 
-            # Calculate percentage for Accuracy
-            percentage_accuracy = accuracy_value * 100
-            percentage_accuracy = round(percentage_accuracy, 2)
-            # Display Accuracy progress bar
-            st.markdown(f"""
+        # Calculate percentage for Accuracy
+        percentage_accuracy = accuracy_value * 100
+        percentage_accuracy = round(percentage_accuracy, 2)
+        # Display Accuracy progress bar
+        st.markdown(f"""
                 <div class="progress-container accuracy">
                     <div class="progress-bar accuracy" style="width: {percentage_accuracy}%;">
                         {percentage_accuracy}%
@@ -464,11 +544,11 @@ def decision_tree_viz():
                 </div>
                 """, unsafe_allow_html=True)
 
-            # Precision Progress Bar
-            precision_color = "#FFD700"  # Pastel Yellow
-            progress_text = f"<div style='position:relative;padding-top: 10px;'>Precision Value</div>"
-            st.write(progress_text, unsafe_allow_html=True)
-            st.markdown("""
+        # Precision Progress Bar
+        precision_color = "#FFD700"  # Pastel Yellow
+        progress_text = f"<div style='position:relative;padding-top: 10px;'>Precision Value</div>"
+        st.write(progress_text, unsafe_allow_html=True)
+        st.markdown("""
                         <style>
                         .progress-container.precision {
                             width: 100%;
@@ -488,11 +568,11 @@ def decision_tree_viz():
                         </style>
                         """, unsafe_allow_html=True)
 
-            # Calculate percentage for Precision
-            percentage_preci = preci_value * 100
-            percentage_preci = round(percentage_preci, 2)
-            # Display Precision progress bar
-            st.markdown(f"""
+        # Calculate percentage for Precision
+        percentage_preci = preci_value * 100
+        percentage_preci = round(percentage_preci, 2)
+        # Display Precision progress bar
+        st.markdown(f"""
                         <div class="progress-container precision">
                             <div class="progress-bar precision" style="width: {percentage_preci}%">
                                 {percentage_preci}%
@@ -500,12 +580,12 @@ def decision_tree_viz():
                         </div>
                         """, unsafe_allow_html=True)
 
-            # Recall Progress Bar
-            recall_color = "#FFA07A"  # Pastel Salmon
-            progress_text = f"<div style='position:relative;padding-top: 10px;'>Recall Value</div>"
+        # Recall Progress Bar
+        recall_color = "#FFA07A"  # Pastel Salmon
+        progress_text = f"<div style='position:relative;padding-top: 10px;'>Recall Value</div>"
 
-            st.write(progress_text, unsafe_allow_html=True)
-            st.markdown("""
+        st.write(progress_text, unsafe_allow_html=True)
+        st.markdown("""
                         <style>
                         .progress-container.recall {
                             width: 100%;
@@ -525,11 +605,11 @@ def decision_tree_viz():
                         </style>
                         """, unsafe_allow_html=True)
 
-            # Calculate percentage for Recall
-            percentage_recall = recall_value * 100
-            percentage_recall = round(percentage_recall, 2)
-            # Display Recall progress bar
-            st.markdown(f"""
+        # Calculate percentage for Recall
+        percentage_recall = recall_value * 100
+        percentage_recall = round(percentage_recall, 2)
+        # Display Recall progress bar
+        st.markdown(f"""
                         <div class="progress-container recall">
                             <div class="progress-bar recall" style="width: {percentage_recall}%">
                                 {percentage_recall}%
@@ -537,37 +617,19 @@ def decision_tree_viz():
                         </div>
                         """, unsafe_allow_html=True)
 
-        # Accuracy Progress Bar
     with tab4:
-            st.image("decision_tree.png")
+        st.image("decision_tree.png")
+
 
 def load_model():
     # Load the saved decision tree model
     decision_tree_model = joblib.load('decision_tree_model.joblib')
     return decision_tree_model
 
-def input_val():
-    st.title("Input Floating Numbers")
-
-    # Input fields for 7 floating-point numbers
-    number1 = st.number_input("Enter Box hole diameter", step=0.1, format="%.2f")
-    number2 = st.number_input("Enter Box hole depth", step=0.1, format="%.2f")
-    number3 = st.number_input("Enter Cylinder diameter", step=0.1, format="%.2f")
-    number4 = st.number_input("Enter Cylinder height", step=0.1, format="%.2f")
-    number5 = st.number_input("Enter Wire diameter", step=0.1, format="%.2f")
-    number6 = st.number_input("Enter Bed distance", step=0.1, format="%.2f")
-    number7 = st.number_input("Enter Material Supplier", step=0.1, format="%.2f")
-
-    df_input_val = pd.DataFrame([[number1, number2, number3, number4, number5, number6, number7]])
-
-    return df_input_val
 
 def predict_input(df_input_val):
     decision_tree_model = load_model()
-
-    # Make predictions on user's input data
     predictions = decision_tree_model.predict(df_input_val)
-
     return predictions
 
 
@@ -586,25 +648,49 @@ def display_prediction(predictions):
     # Adding some color to the output for better visualization
     st.markdown(f' <p  style="color:{color};font-size:20px;">{predict}{predictions_val}</p>', unsafe_allow_html=True)
 
+
+def get_table_download_link():
+    df = pd.DataFrame({
+        'Box hole diameter': [30.671085, 30.211838, 29.208569],
+        'Box hole depth': [33.816286, 32.237568, 35.959047],
+        'Cylinder diameter': [30.139838, 30.926533, 31.071050],
+        'Cylinder height': [32.814482, 29.192808, 32.021252],
+        'Wire diameter': [1.724487, 1.788960, 1.685131],
+        'Bed distance': [0.055709, 0.169561, 0.197313],
+        'Material Supplier': ['Supplier_A', 'Supplier_B', 'Supplier_C']
+    })
+
+    output = BytesIO()
+    writer = pd.ExcelWriter(output, engine='xlsxwriter')
+    df.to_excel(writer, index=False, sheet_name='Sheet1')
+    writer.close()
+    processed_data = output.getvalue()
+    encoded_data = b64encode(processed_data).decode()
+    download_link = f'<a href="data:application/octet-stream;base64,{encoded_data}" download="data.xlsx">Download Sample Excel file</a>'
+    return download_link
+
+
 def main():
     st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
 
-    sections = {'Bar-Chart': 'Bar-Chart', 'Plot': 'Plot', 'K-Means': 'k-means', 'Decision Tree':'Decision Tree'}
+    sections = {'Bar-Chart': 'Bar-Chart', 'Plot': 'Plot', 'K-Means': 'k-means', 'Decision Tree': 'Decision Tree'}
 
-    st.sidebar.title('PMV4')
-    selected_nav = st.sidebar.selectbox("Navigate to", list(sections.keys()), key='navigation')
+    # Define the options for the navigation menu
+    options = list(sections.keys())
 
-    if selected_nav:
-        st.session_state.selected_nav = sections[selected_nav]
+    # Use the option_menu for sidebar menu
+    with st.sidebar:
+        selected_nav = option_menu("PMV4", options, default_index=0)
 
-    nav = st.session_state.selected_nav
+    # Map the selected option to the corresponding section
+    selected_section = sections.get(selected_nav)
 
-    if nav == 'Bar-Chart':
-        # bar_chart()
+    # Display content based on the selected section
+    if selected_section == 'Bar-Chart':
         df_bar_chart_Evaluation()
         df_bar_chart_fitting_group()
 
-    elif nav == 'Plot':
+    elif selected_section == 'Plot':
         tab1, tab2 = st.tabs(["Box-Plot", "Scatter-Plot"])
         with tab1:
             st.header("Box-Plot")
@@ -612,17 +698,15 @@ def main():
         with tab2:
             st.header("Scatter-Plot")
             scatter_plot()
-    elif nav == 'k-means':
+
+    elif selected_section == 'k-means':
         kmeans_info_popover()
         fitting_group_visualisation()
         fitting_group_visualisation_dbscan()
         kmeans()
-    elif nav == 'Decision Tree':
+
+    elif selected_section == 'Decision Tree':
         decision_tree_viz()
-
-
-
-
 
 
 if __name__ == "__main__":
