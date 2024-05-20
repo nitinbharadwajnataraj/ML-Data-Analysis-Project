@@ -465,8 +465,16 @@ def decision_tree_viz():
                     predictions = predict_input(df_input_val)
                     prediction_labels = ['NOK' if pred == 0 else 'OK' for pred in predictions]
                     df_input_val['Prediction'] = prediction_labels
-                    df_input_val_styled = df_input_val.style.applymap(
-                        lambda x: 'color: green' if x == 'OK' else 'color: red', subset=['Prediction'])
+
+                    def apply_color(val):
+                        if val == 'OK':
+                            color = 'background-color: rgba(0, 255, 0, 0.3)'
+                        else:
+                            color = 'background-color: rgba(255, 0, 0, 0.3)'
+                        return color
+
+                    df_input_val_styled = df_input_val.style.applymap(apply_color, subset=['Prediction'])
+
                     st.write("Predictions:")
                     st.dataframe(df_input_val_styled)
             else:
