@@ -8,7 +8,7 @@ data_model = {
         "cylinder_height": {"target_value": 30, "min_value": 26, "max_value": 36, "factor": 1}
     },
     "Wire_dia": {
-        "wire_diameter": {"target_value": 1.72, "min_value": 1.68, "max_value": 1.76, "factor": 1},
+        "wire_diameter": {"target_value": 1.7, "min_value": 1.6, "max_value": 1.8, "factor": 1},
         },
     "Elephant_foot": {
         "bed_distance":{"target_value": 0.15, "min_value":0.1, "max_value":0.2, "factor":1}

@@ -31,12 +31,12 @@ def generate_dataset(num_rows, data_model):
     return df_final
 
 def create_fake_dataset():
-    num_rows = 1000  # Adjust the number of rows as needed
+    num_rows = 10000  # Adjust the number of rows as needed
     fake_dataset = generate_dataset(num_rows, data_model)
     return fake_dataset
 
 fake_data = create_fake_dataset()
-# path = os.path.join(os.path.expanduser('~'),'Downloads')
-# file_path = os.path.join(path, 'fake_data.csv')
-# fake_data.to_csv(file_path, index=False)
-# print(fake_data
+path = os.path.join(os.path.expanduser('~'),'Downloads')
+file_path = os.path.join(path, 'fake_data.csv')
+fake_data.to_csv(file_path, index=False)
+# print(fake_data)

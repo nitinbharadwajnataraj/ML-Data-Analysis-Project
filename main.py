@@ -39,6 +39,8 @@ def color_code2(val):
         color = 'rgba(255, 165, 0, 0.3)'
     return f'background-color: {color}'
 
+def actual_target_values():
+    df = pd.read_excel("fake_data.xlsx")
 
 def df_fitting_and_evaluation():
     df = pd.read_excel("fake_data.xlsx")
@@ -47,7 +49,10 @@ def df_fitting_and_evaluation():
     # Using & instead of 'and'
     condition1 = (df["fitting_distance"] <= 1) & (df["fitting_distance"] >= -1)
     condition2 = (df["fitting_distance"] > 1)
-
+    # condition3 = (df["bed_distance"])
+    predicted_df = pd.read_excel("predicted_data.xlsx")
+    predicted_df.index = df.index
+    df['Prediction'] = predicted_df['Prediction']
     # Assigning values based on conditions
     df.loc[condition1, "Evaluation"] = 'OK'
     df.loc[condition1, "fitting_group"] = 'Transition'
@@ -56,7 +61,8 @@ def df_fitting_and_evaluation():
     df.loc[~(condition1 | condition2), "Evaluation"] = 'NOK'
     df.loc[~(condition1 | condition2), "fitting_group"] = 'Excess'
 
-    styled_df = df.style.map(color_code, subset=['Evaluation', 'fitting_group'])
+    # df_to_write = df.merge(predicted_df[["Prediction"]], on="ID", how="left")
+    styled_df = df.style.map(color_code, subset=['Evaluation', 'fitting_group', 'Prediction'])
     styled_df = styled_df.map(color_code2, subset=['fitting_distance'])
 
     return df, styled_df
@@ -388,11 +394,12 @@ def fitting_group_visualisation_dbscan():
     st.plotly_chart(fig)
 
 
-MATERIAL_SUPPLIER_MAPPING = {
-    'Supplier_A': 0,
-    'Supplier_B': 1,
-    'Supplier_C': 2
-}
+# MATERIAL_SUPPLIER_MAPPING = {
+#     'Supplier_A': 0,
+#     'Supplier_B': 1,
+#     'Supplier_C': 2
+# }
+
 
 
 def rename_dataframe_columns(df):
@@ -404,7 +411,7 @@ def rename_dataframe_columns(df):
         'Cylinder height': 'cylinder_height',
         'Wire diameter': 'wire_diameter',
         'Bed distance': 'bed_distance',
-        'Material Supplier': 'Material_seller'
+        # 'Material Supplier': 'Material_seller'
     })
     return df
 
@@ -427,16 +434,17 @@ def decision_tree_viz():
                 number4 = st.number_input("Enter Cylinder height", step=0.1, format="%.2f")
                 number5 = st.number_input("Enter Wire diameter", step=0.1, format="%.2f")
                 number6 = st.number_input("Enter Bed distance", step=0.1, format="%.2f")
-                material_supplier = st.selectbox("Select Material Supplier",
-                                                 options=list(MATERIAL_SUPPLIER_MAPPING.keys()))
+
+                # material_supplier = st.selectbox("Select Material Supplier",
+                #                                  options=list(MATERIAL_SUPPLIER_MAPPING.keys()))
 
                 submitted = st.form_submit_button("Make Prediction")
                 if submitted:
-                    material_supplier_value = MATERIAL_SUPPLIER_MAPPING[material_supplier]
+                    # material_supplier_value = MATERIAL_SUPPLIER_MAPPING[material_supplier]
                     df_input_val = pd.DataFrame(
-                        [[number1, number2, number3, number4, number5, number6, material_supplier_value]],
+                        [[number1, number2, number3, number4, number5, number6]],
                         columns=['Box hole diameter', 'Box hole depth', 'Cylinder diameter',
-                                 'Cylinder height', 'Wire diameter', 'Bed distance', 'Material Supplier'])
+                                 'Cylinder height', 'Wire diameter', 'Bed distance'])
                     df_input_val = rename_dataframe_columns(df_input_val)
                     prediction = predict_input(df_input_val)
                     display_prediction(prediction)
@@ -453,13 +461,14 @@ def decision_tree_viz():
                     st.error("Unsupported file format. Please upload an Excel (xlsx/xls) or CSV (csv) file.")
                     return
 
-                if 'Material Supplier' in df_input_val.columns:
-                    df_input_val['Material Supplier'] = df_input_val['Material Supplier'].apply(
-                        lambda x: MATERIAL_SUPPLIER_MAPPING[x] if isinstance(x,
-                                                                             str) and x in MATERIAL_SUPPLIER_MAPPING else x
-                    )
-                    st.write("Data uploaded:")
-                    st.write(df_input_val)
+
+                # if 'Material Supplier' in df_input_val.columns:
+                #     df_input_val['Material Supplier'] = df_input_val['Material Supplier'].apply(
+                #         lambda x: MATERIAL_SUPPLIER_MAPPING[x] if isinstance(x,
+                #                                                              str) and x in MATERIAL_SUPPLIER_MAPPING else x
+                #     )
+                #     st.write("Data uploaded:")
+                #     st.write(df_input_val)
                 if st.button("Make Prediction"):
                     df_input_val = rename_dataframe_columns(df_input_val)
                     predictions = predict_input(df_input_val)
@@ -534,7 +543,7 @@ def decision_tree_viz():
                     top: 300%;
                     left :7%;
                     transform: translate(-50%, -50%);
-                
+
                     color: black;  /* Change the color as needed */
                 }
                 </style>
@@ -663,9 +672,10 @@ def get_table_download_link():
         'Box hole depth': [33.816286, 32.237568, 35.959047],
         'Cylinder diameter': [30.139838, 30.926533, 31.071050],
         'Cylinder height': [32.814482, 29.192808, 32.021252],
-        'Wire diameter': [1.724487, 1.788960, 1.685131],
-        'Bed distance': [0.055709, 0.169561, 0.197313],
-        'Material Supplier': ['Supplier_A', 'Supplier_B', 'Supplier_C']
+
+        'Wire diameter': [1.724487, 1.788960, 2.685131],
+        'Bed distance': [0.055709, 0.169561, 0.197313]
+
     })
 
     output = BytesIO()
@@ -715,7 +725,6 @@ def main():
 
     elif selected_section == 'Decision Tree':
         decision_tree_viz()
-
 
 if __name__ == "__main__":
     main()
