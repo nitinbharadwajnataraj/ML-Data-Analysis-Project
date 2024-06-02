@@ -66,8 +66,8 @@ def visualize_decision_tree(dtc, feature_names):
 def Decision_Tress():
     df = prepare_DT_df()
 
-    X = df.iloc[:, 0:7]
-    y = df.iloc[:, 7]
+    X = df.iloc[:, 0:6]
+    y = df.iloc[:, 6]
     print(X, y)
     x_main, x_test, y_main, y_test = train_test_split(X, y, test_size=0.2, random_state=17, stratify=y)
     x_train, x_val, y_train, y_val = train_test_split(x_main, y_main, test_size=0.2, random_state=17, stratify=y_main)
