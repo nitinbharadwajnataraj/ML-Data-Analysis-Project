@@ -26,13 +26,13 @@ def df_fitting_and_evaluation():
 
 def prepare_DT_df():
     df = df_fitting_and_evaluation()
-    print("Original DataFrame:")
-    print(df.head())  # Check the original DataFrame
+    #print("Original DataFrame:")
+    #print(df.head())  # Check the original DataFrame
 
     # Drop unnecessary columns
-    print(df.columns)
+    #print(df.columns)
     df = df.drop(columns=['ID', 'fitting_distance'])
-    print(df)
+    #print(df)
     # Initialize LabelEncoder
     label_encoder = LabelEncoder()
     #
@@ -41,13 +41,13 @@ def prepare_DT_df():
     #
     # # Mapping of original values to encoded values
     label_mapping = dict(zip(label_encoder.classes_, label_encoder.transform(label_encoder.classes_)))
-    print("Label mapping:", label_mapping)
+    #print("Label mapping:", label_mapping)
 
     # Drop the original 'fitting_group' column
     df = df.drop(columns=['Evaluation'])
 
-    print("DataFrame after preprocessing:")
-    print(df.head())  # Check the DataFrame after preprocessing
+    #print("DataFrame after preprocessing:")
+    #print(df.head())  # Check the DataFrame after preprocessing
 
     return df
 
@@ -68,7 +68,8 @@ def Decision_Tress():
 
     X = df.iloc[:, 0:6]
     y = df.iloc[:, 6]
-    print(X, y)
+    #print(X, y)
+
     x_main, x_test, y_main, y_test = train_test_split(X, y, test_size=0.2, random_state=17, stratify=y)
     x_train, x_val, y_train, y_val = train_test_split(x_main, y_main, test_size=0.2, random_state=17, stratify=y_main)
 
@@ -82,17 +83,17 @@ def Decision_Tress():
 
     # This is Validation
     y_pred_val = dtc.predict(x_val)
-    print("Confusion Matrics for Validation:")
-    print(confusion_matrix(y_val, y_pred_val))
-    print("classification_report for Validation:")
-    print(classification_report(y_val, y_pred_val))
+    #print("Confusion Matrics for Validation:")
+    #print(confusion_matrix(y_val, y_pred_val))
+    #print("classification_report for Validation:")
+    #print(classification_report(y_val, y_pred_val))
 
     # this is for Testing
     y_pred_test = dtc.predict(x_test)
-    print("Confusion Matrics for TEST:")
-    print(confusion_matrix(y_test, y_pred_test))
-    print("classification_report of TEST:")
-    print(classification_report(y_test, y_pred_test))
+    #print("Confusion Matrics for TEST:")
+    #print(confusion_matrix(y_test, y_pred_test))
+    #print("classification_report of TEST:")
+    #print(classification_report(y_test, y_pred_test))
     classification_report_val = classification_report(y_test, y_pred_test)
     confusion_matrix_test = confusion_matrix(y_test, y_pred_test)
     preci_value = precision_score(y_test, y_pred_test, average='weighted')
@@ -100,7 +101,7 @@ def Decision_Tress():
     accuracy_value = accuracy_score(y_test, y_pred_test)
 
     features = pd.DataFrame(dtc.feature_importances_, index=X.columns)
-    print(features.head(6))
+    #print(features.head(6))
     visualize_decision_tree(dtc, X.columns)
     # Function to visualize Decision Tree
 
