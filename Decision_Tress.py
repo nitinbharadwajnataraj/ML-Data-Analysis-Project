@@ -1,11 +1,14 @@
+import graphviz
 import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import confusion_matrix, accuracy_score, classification_report, precision_score, recall_score
-from sklearn.tree import DecisionTreeClassifier
+from sklearn.tree import DecisionTreeClassifier, export_graphviz
 from sklearn import tree
 import joblib
+
+
 
 def df_fitting_and_evaluation():
     df = pd.read_excel("fake_data.xlsx")
@@ -52,22 +55,31 @@ def prepare_DT_df():
     return df
 
 
-def visualize_decision_tree(dtc, feature_names):
-    plt.figure(figsize=(25, 20))
-    tree.plot_tree(dtc, feature_names=feature_names, class_names=['OK', 'NOK'], filled=True, rounded=True,
-                   fontsize=12)
-    plt.title("Decision Tree Visualization", fontsize=20)
-    plt.xlabel("Features", fontsize=16)
-    plt.ylabel("Class", fontsize=16)
-    plt.savefig("decision_tree.png")  # Save the plot as an image
-    plt.show()
+# def visualize_decision_tree(dtc, feature_names):
+#     plt.figure(figsize=(50, 55))
+#     tree.plot_tree(dtc, feature_names=feature_names, class_names=['OK', 'NOK'], filled=True, rounded=True,
+#                    fontsize=12)
+#     plt.title("Decision Tree Visualization", fontsize=20)
+#     plt.xlabel("Features", fontsize=16)
+#     plt.ylabel("Class", fontsize=16)
+#     plt.savefig("decision_tree.png")  # Save the plot as an image
+#     plt.show()
 
+def visualize_decision_tree(dtc, feature_names):
+    dot_data = export_graphviz(dtc, out_file=None,
+                               feature_names=feature_names,
+                               class_names=['OK', 'NOK'],
+                               filled=True, rounded=True,
+                               special_characters=False)
+    graph = graphviz.Source(dot_data)
+    graph.render("decision_tree_graphviz", format='png', cleanup=True)
 
 def Decision_Tress():
     df = prepare_DT_df()
 
     X = df.iloc[:, 0:6]
     y = df.iloc[:, 6]
+    #print(X, y)
     #print(X, y)
 
     x_main, x_test, y_main, y_test = train_test_split(X, y, test_size=0.2, random_state=17, stratify=y)
@@ -94,6 +106,10 @@ def Decision_Tress():
     #print(confusion_matrix(y_test, y_pred_test))
     #print("classification_report of TEST:")
     #print(classification_report(y_test, y_pred_test))
+    #print("Confusion Matrics for TEST:")
+    #print(confusion_matrix(y_test, y_pred_test))
+    print("classification_report of TEST:")
+    print(classification_report(y_test, y_pred_test))
     classification_report_val = classification_report(y_test, y_pred_test)
     confusion_matrix_test = confusion_matrix(y_test, y_pred_test)
     preci_value = precision_score(y_test, y_pred_test, average='weighted')
