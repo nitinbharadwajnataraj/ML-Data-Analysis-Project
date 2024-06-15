@@ -635,7 +635,7 @@ def decision_tree_viz():
                         """, unsafe_allow_html=True)
 
     with tab4:
-        st.image("decision_tree.png")
+        st.image("decision_tree_graphviz.png")
 
 
 def load_model():

@@ -4,18 +4,12 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="54c727bd-5502-4d94-92e6-ef0722eaca1d" name="Changes" comment="Committed the chnages for Confusion matrix &amp; Evaluation Metrics for Decision Trees">
-      <change beforePath="$PROJECT_DIR$/.idea/ML_Stator_Hairline_Project.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/ML_Stator_Hairline_Project.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_04_2024_09_53__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_21_04_2024_09_53__Changes_.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_30_03_2024_12_19__Changes_.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/shelf/Uncommitted_changes_before_Update_at_30_03_2024_12_19__Changes_.xml" afterDir="false" />
+    <list default="true" id="54c727bd-5502-4d94-92e6-ef0722eaca1d" name="Changes" comment="Added Actual values to compare it with predicted values for DT">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Decision_Tress.py" beforeDir="false" afterPath="$PROJECT_DIR$/Decision_Tress.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/create_fake_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/create_fake_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/data_model.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/decision_tree.png" beforeDir="false" afterPath="$PROJECT_DIR$/decision_tree.png" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/decision_tree_model.joblib" beforeDir="false" afterPath="$PROJECT_DIR$/decision_tree_model.joblib" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fake_data.xlsx" beforeDir="false" afterPath="$PROJECT_DIR$/fake_data.xlsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/main.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -67,7 +61,7 @@
     &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
 }</component>
-  <component name="RunManager" selected="Python.create_fake_data">
+  <component name="RunManager" selected="Python.Decision_Tress">
     <configuration name="Compute_fit" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="ML_Stator_Hairline_Project" />
       <option name="ENV_FILES" value="" />
@@ -162,8 +156,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.create_fake_data" />
         <item itemvalue="Python.Decision_Tress" />
+        <item itemvalue="Python.create_fake_data" />
         <item itemvalue="Python.Compute_fit" />
       </list>
     </recent_temporary>
@@ -202,7 +196,9 @@
       <workItem from="1713214233369" duration="1631000" />
       <workItem from="1713525109522" duration="6169000" />
       <workItem from="1714813371479" duration="14080000" />
-      <workItem from="1717332970217" duration="1313000" />
+      <workItem from="1717332970217" duration="2406000" />
+      <workItem from="1717503425790" duration="1670000" />
+      <workItem from="1717505118240" duration="2613000" />
     </task>
     <task id="LOCAL-00001" summary="changed Compute_fit.py">
       <option name="closed" value="true" />
@@ -340,7 +336,15 @@
       <option name="project" value="LOCAL" />
       <updated>1714830234614</updated>
     </task>
-    <option name="localTasksCounter" value="18" />
+    <task id="LOCAL-00018" summary="Added Actual values to compare it with predicted values for DT">
+      <option name="closed" value="true" />
+      <created>1717338948656</created>
+      <option name="number" value="00018" />
+      <option name="presentableId" value="LOCAL-00018" />
+      <option name="project" value="LOCAL" />
+      <updated>1717338948656</updated>
+    </task>
+    <option name="localTasksCounter" value="19" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -357,12 +361,13 @@
     <MESSAGE value="." />
     <MESSAGE value="Made changes to the UI accordingly" />
     <MESSAGE value="Committed the chnages for Confusion matrix &amp; Evaluation Metrics for Decision Trees" />
-    <option name="LAST_COMMIT_MESSAGE" value="Committed the chnages for Confusion matrix &amp; Evaluation Metrics for Decision Trees" />
+    <MESSAGE value="Added Actual values to compare it with predicted values for DT" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added Actual values to compare it with predicted values for DT" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$create_fake_data.coverage" NAME="create_fake_data Coverage Results" MODIFIED="1715425364715" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$Compute_fit.coverage" NAME="Compute_fit Coverage Results" MODIFIED="1711664988296" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$Decision_Tress.coverage" NAME="Decision_Tress Coverage Results" MODIFIED="1713530917402" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$Decision_Tress.coverage" NAME="Decision_Tress Coverage Results" MODIFIED="1717505671724" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ML_Stator_Hairline_Project$main.coverage" NAME="main Coverage Results" MODIFIED="1711651733731" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ML_Data_Analysis_Project$Decision_Tress.coverage" NAME="Decision_Tress Coverage Results" MODIFIED="1714831083985" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/ML_Data_Analysis_Project$create_fake_data.coverage" NAME="create_fake_data Coverage Results" MODIFIED="1714816320850" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
