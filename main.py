@@ -16,7 +16,6 @@ import joblib
 
 st.set_page_config(layout="wide")
 
-
 def color_code(val):
     if val == 'OK':
         color = 'rgba(0, 255, 0, 0.3)'
@@ -61,7 +60,6 @@ def df_fitting_and_evaluation():
     df.loc[condition2, "fitting_group"] = 'Clearance'
     df.loc[~(condition1 | condition2), "Evaluation"] = 'NOK'
     df.loc[~(condition1 | condition2), "fitting_group"] = 'Excess'
-
 
     # df_to_write = df.merge(predicted_df[["Prediction"]], on="ID", how="left")
     styled_df = df.style.map(color_code, subset=['Evaluation', 'fitting_group', 'Prediction'])
@@ -403,6 +401,7 @@ def fitting_group_visualisation_dbscan():
 # }
 
 
+
 def rename_dataframe_columns(df):
     # Rename the columns to match the expected feature names
     df = df.rename(columns={
@@ -415,7 +414,6 @@ def rename_dataframe_columns(df):
         # 'Material Supplier': 'Material_seller'
     })
     return df
-
 
 def decision_tree_viz():
     preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test = Decision_Tress()
@@ -436,6 +434,7 @@ def decision_tree_viz():
                 number4 = st.number_input("Enter Cylinder height", step=0.1, format="%.2f")
                 number5 = st.number_input("Enter Wire diameter", step=0.1, format="%.2f")
                 number6 = st.number_input("Enter Bed distance", step=0.1, format="%.2f")
+
                 # material_supplier = st.selectbox("Select Material Supplier",
                 #                                  options=list(MATERIAL_SUPPLIER_MAPPING.keys()))
 
@@ -461,6 +460,7 @@ def decision_tree_viz():
                 else:
                     st.error("Unsupported file format. Please upload an Excel (xlsx/xls) or CSV (csv) file.")
                     return
+
 
                 # if 'Material Supplier' in df_input_val.columns:
                 #     df_input_val['Material Supplier'] = df_input_val['Material Supplier'].apply(
@@ -672,8 +672,10 @@ def get_table_download_link():
         'Box hole depth': [33.816286, 32.237568, 35.959047],
         'Cylinder diameter': [30.139838, 30.926533, 31.071050],
         'Cylinder height': [32.814482, 29.192808, 32.021252],
+
         'Wire diameter': [1.724487, 1.788960, 2.685131],
         'Bed distance': [0.055709, 0.169561, 0.197313]
+
     })
 
     output = BytesIO()

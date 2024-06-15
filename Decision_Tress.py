@@ -80,6 +80,8 @@ def Decision_Tress():
     X = df.iloc[:, 0:6]
     y = df.iloc[:, 6]
     #print(X, y)
+    #print(X, y)
+
     x_main, x_test, y_main, y_test = train_test_split(X, y, test_size=0.2, random_state=17, stratify=y)
     x_train, x_val, y_train, y_val = train_test_split(x_main, y_main, test_size=0.2, random_state=17, stratify=y_main)
 
@@ -102,6 +104,10 @@ def Decision_Tress():
     y_pred_test = dtc.predict(x_test)
     #print("Confusion Matrics for TEST:")
     #print(confusion_matrix(y_test, y_pred_test))
+    #print("classification_report of TEST:")
+    #print(classification_report(y_test, y_pred_test))
+    #print("Confusion Matrics for TEST:")
+    #print(confusion_matrix(y_test, y_pred_test))
     print("classification_report of TEST:")
     print(classification_report(y_test, y_pred_test))
     classification_report_val = classification_report(y_test, y_pred_test)
@@ -111,7 +117,7 @@ def Decision_Tress():
     accuracy_value = accuracy_score(y_test, y_pred_test)
 
     features = pd.DataFrame(dtc.feature_importances_, index=X.columns)
-    print(features.head(6))
+    #print(features.head(6))
     visualize_decision_tree(dtc, X.columns)
     # Function to visualize Decision Tree
 
