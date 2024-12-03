@@ -109,68 +109,85 @@ def df_bar_chart_fitting_group():
 def scatter_plot():
     df_1 = compute_fit()
     df_1 = df_1.drop(columns=['ID'], axis=1)
-    col1, col2 = st.columns([0.3, 0.7])
-    with col1:
-        selected_shape = st.selectbox("Select shape for scatter plot", ["Box", "Cylinder"], key="select_shape")
+    selected_shape = st.selectbox("Select shape for scatter plot", ["Box", "Cylinder"], key="select_shape")
 
-        if selected_shape:
-            if selected_shape == "Box":
-                related_columns = ["box_hole_diameter", "box_hole_depth"]
-            elif selected_shape == "Cylinder":
-                related_columns = ["cylinder_diameter", "cylinder_height"]
-            else:
-                related_columns = []
+    if selected_shape:
+        if selected_shape == "Box":
+            related_columns = ["box_hole_diameter", "box_hole_depth"]
+        elif selected_shape == "Cylinder":
+            related_columns = ["cylinder_diameter", "cylinder_height"]
+        else:
+            related_columns = []
 
-            selected_column = st.selectbox("Select a column for scatter plot", related_columns, key="select_column")
+        selected_column = st.selectbox("Select a column for scatter plot", related_columns, key="select_column")
 
-            yes_color = '#FF7F0E'
-            no_color = 'grey'
+        yes_color = '#FF7F0E'
+        no_color = 'grey'
+        if selected_column:
+            st.write("Scatter Plot:")
+            fig = go.Figure()
+            # Separate traces for `yes` and `no` to enable legends
+            yes_points = df_1[df_1["check"] == 'yes']
+            no_points = df_1[df_1["check"] == 'no']
 
-        with col2:
-            if selected_column:
-                st.write("Scatter Plot:")
-                fig = go.Figure()
+            # Add `yes` points
+            fig.add_trace(go.Scatter(
+                x=yes_points.index,
+                y=yes_points[selected_column],
+                mode='markers',
+                name='OK '+'for the shape '+selected_shape+' and column '+selected_column,  # Legend entry for 'Yes'
+                marker=dict(color=yes_color)
+            ))
 
-                colors = [yes_color if val == 'yes' else no_color for val in df_1["check"]]
-                fig.add_trace(go.Scatter(x=df_1.index, y=df_1[selected_column], mode='markers', name=selected_column,
-                                         marker=dict(color=colors)))
+            # Add `no` points
+            fig.add_trace(go.Scatter(
+                x=no_points.index,
+                y=no_points[selected_column],
+                mode='markers',
+                name='NOK '+'for the shape '+selected_shape+' and column '+selected_column,  # Legend entry for 'No'
+                marker=dict(color=no_color)
+            ))
 
-                min_value = data_model[selected_shape][selected_column]["min_value"]
-                max_value = data_model[selected_shape][selected_column]["max_value"]
-                target_value = data_model[selected_shape][selected_column]["target_value"]
+            #colors = [yes_color if val == 'yes' else no_color for val in df_1["check"]]
+            #fig.add_trace(go.Scatter(x=df_1.index, y=df_1[selected_column], mode='markers', name=selected_column,
+                                     #marker=dict(color=colors)))
 
-                fig.add_shape(type="line", x0=df_1.index.min(), y0=min_value, x1=df_1.index.max(), y1=min_value,
-                              line=dict(color="red", width=1, dash="solid"))
-                fig.add_shape(type="line", x0=df_1.index.min(), y0=max_value, x1=df_1.index.max(), y1=max_value,
-                              line=dict(color="red", width=1, dash="solid"))
-                fig.add_shape(type="line", x0=df_1.index.min(), y0=target_value, x1=df_1.index.max(), y1=target_value,
-                              line=dict(color="lime", width=1, dash="solid"))
+            min_value = data_model[selected_shape][selected_column]["min_value"]
+            max_value = data_model[selected_shape][selected_column]["max_value"]
+            target_value = data_model[selected_shape][selected_column]["target_value"]
 
-                fig.add_annotation(
-                    x=df_1.index.min(),
-                    y=min_value,
-                    text="Minimum Value",
-                    showarrow=False,
-                    font=dict(size=12, color="red")
-                )
-                fig.add_annotation(
-                    x=df_1.index.min(),
-                    y=max_value,
-                    text="Maximum Value",
-                    showarrow=False,
-                    font=dict(size=12, color="red")
-                )
-                fig.add_annotation(
-                    x=df_1.index.min(),
-                    y=target_value,
-                    text="Target Value",
-                    showarrow=False,
-                    font=dict(size=12, color="lime")
-                )
+            fig.add_shape(type="line", x0=df_1.index.min(), y0=min_value, x1=df_1.index.max(), y1=min_value,
+                          line=dict(color="red", width=1, dash="solid"))
+            fig.add_shape(type="line", x0=df_1.index.min(), y0=max_value, x1=df_1.index.max(), y1=max_value,
+                          line=dict(color="red", width=1, dash="solid"))
+            fig.add_shape(type="line", x0=df_1.index.min(), y0=target_value, x1=df_1.index.max(), y1=target_value,
+                          line=dict(color="lime", width=1, dash="solid"))
 
-                st.plotly_chart(fig)
-            else:
-                st.warning("Please select a column for the scatter plot.")
+            fig.add_annotation(
+                x=df_1.index.min(),
+                y=min_value,
+                text="Minimum Value",
+                showarrow=False,
+                font=dict(size=12, color="red")
+            )
+            fig.add_annotation(
+                x=df_1.index.min(),
+                y=max_value,
+                text="Maximum Value",
+                showarrow=False,
+                font=dict(size=12, color="red")
+            )
+            fig.add_annotation(
+                x=df_1.index.min(),
+                y=target_value,
+                text="Target Value",
+                showarrow=False,
+                font=dict(size=12, color="lime")
+            )
+
+            st.plotly_chart(fig,use_container_width=True)
+        else:
+            st.warning("Please select a column for the scatter plot.")
 
 
 def box_plot():
@@ -178,7 +195,7 @@ def box_plot():
     fig = go.Figure()
     for column in df.columns[1:]:
         fig.add_trace(go.Box(y=df[column], name=column))
-    fig.update_layout(title='Box Plot(Fake_data understanding)', xaxis_title='Parameters', yaxis_title='Values')
+    fig.update_layout(title='Box Plot(Understanding Synthetic Data)', xaxis_title='Parameters', yaxis_title='Values')
     st.plotly_chart(fig)
 
 
@@ -299,9 +316,9 @@ def kmeans():
 
 
 def fitting_group_visualisation():
-    st.header("Synthetic Data")
+    #st.header("Synthetic Data")
     main_df, df1 = df_fitting_and_evaluation()
-    st.dataframe(df1, width=1000)
+    #st.dataframe(df1, width=1000)
     st.header("K-means")
     col1, col2 = st.columns(2)
     with col1:
@@ -418,7 +435,7 @@ def rename_dataframe_columns(df):
 def decision_tree_viz():
     preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test = Decision_Tress()
     tab0, tab1, tab2, tab4 = st.tabs(
-        ["Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Decision Tree Visualization"])
+        ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Decision Tree Visualization"])
     preci_value = round(preci_value, 4)
     recall_value = round(recall_value, 4)
     accuracy_value = round(accuracy_value, 4)
@@ -428,12 +445,12 @@ def decision_tree_viz():
         if option == "Manual Input":
             with st.form("prediction_form"):
                 st.write("Enter the input values:")
-                number1 = st.number_input("Enter Box hole diameter", step=0.1, format="%.2f")
-                number2 = st.number_input("Enter Box hole depth", step=0.1, format="%.2f")
-                number3 = st.number_input("Enter Cylinder diameter", step=0.1, format="%.2f")
-                number4 = st.number_input("Enter Cylinder height", step=0.1, format="%.2f")
-                number5 = st.number_input("Enter Wire diameter", step=0.1, format="%.2f")
-                number6 = st.number_input("Enter Bed distance", step=0.1, format="%.2f")
+                number1 = st.number_input("Enter Box hole diameter", step=0.1, format="%.2f", value=30.099909)
+                number2 = st.number_input("Enter Box hole depth", step=0.1, format="%.2f", value=37.075133)
+                number3 = st.number_input("Enter Cylinder diameter", step=0.1, format="%.2f", value=29.515288)
+                number4 = st.number_input("Enter Cylinder height", step=0.1, format="%.2f", value=28.470196)
+                number5 = st.number_input("Enter Wire diameter", step=0.1, format="%.2f", value=1.724816)
+                number6 = st.number_input("Enter Bed distance", step=0.1, format="%.2f", value=0.181060)
 
                 # material_supplier = st.selectbox("Select Material Supplier",
                 #                                  options=list(MATERIAL_SUPPLIER_MAPPING.keys()))
@@ -633,6 +650,8 @@ def decision_tree_viz():
                             </div>
                         </div>
                         """, unsafe_allow_html=True)
+        df_bar_chart_Evaluation()
+        df_bar_chart_fitting_group()
 
     with tab4:
         st.image("decision_tree_graphviz.png")
@@ -691,14 +710,14 @@ def get_table_download_link():
 def main():
     st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
 
-    sections = {'Bar-Chart': 'Bar-Chart', 'Plot': 'Plot', 'K-Means': 'k-means', 'Decision Tree': 'Decision Tree'}
+    sections = {'Data Understanding': 'Data Understanding', 'K-Means': 'k-means', 'Decision Tree': 'Decision Tree'}
 
     # Define the options for the navigation menu
     options = list(sections.keys())
 
     # Use the option_menu for sidebar menu
     with st.sidebar:
-        selected_nav = option_menu("PMV4", options, default_index=0)
+        selected_nav = option_menu("PMV4 Analytics", options, default_index=0)
 
     # Map the selected option to the corresponding section
     selected_section = sections.get(selected_nav)
@@ -708,22 +727,32 @@ def main():
         df_bar_chart_Evaluation()
         df_bar_chart_fitting_group()
 
-    elif selected_section == 'Plot':
+    elif selected_section == 'Data Understanding':
+        st.header('Synthetic Dataset')
+        main_df, df1 = df_fitting_and_evaluation()
+        main_df.drop(columns=['fitting_distance','Prediction', 'Evaluation','fitting_group'], inplace=True)
+        st.dataframe(main_df, hide_index=True, width=1250)
         tab1, tab2 = st.tabs(["Box-Plot", "Scatter-Plot"])
         with tab1:
             st.header("Box-Plot")
             box_plot()
         with tab2:
+            df_engineering_data_from_xlsx = pd.read_excel('Engineering_data.xlsx')
+            st.header('Box-Cylinder Model Range ')
+            st.dataframe(df_engineering_data_from_xlsx, hide_index=True)
             st.header("Scatter-Plot")
             scatter_plot()
 
     elif selected_section == 'k-means':
         kmeans_info_popover()
         fitting_group_visualisation()
-        fitting_group_visualisation_dbscan()
+        #fitting_group_visualisation_dbscan()
         kmeans()
 
     elif selected_section == 'Decision Tree':
+        st.header("Predictions for Synthetic Dataset")
+        main_df, df1 = df_fitting_and_evaluation()
+        st.dataframe(df1,hide_index=True,width=1250)
         decision_tree_viz()
 
 if __name__ == "__main__":
