@@ -166,21 +166,21 @@ def scatter_plot():
             fig.add_annotation(
                 x=df_1.index.min(),
                 y=min_value,
-                text="Minimum Value",
+                text="Min",
                 showarrow=False,
                 font=dict(size=12, color="red")
             )
             fig.add_annotation(
                 x=df_1.index.min(),
                 y=max_value,
-                text="Maximum Value",
+                text="Max",
                 showarrow=False,
                 font=dict(size=12, color="red")
             )
             fig.add_annotation(
                 x=df_1.index.min(),
                 y=target_value,
-                text="Target Value",
+                text="Target",
                 showarrow=False,
                 font=dict(size=12, color="lime")
             )
@@ -242,7 +242,7 @@ def kmeans():
     st.write("Selected number of Clusters:", num_clusters_write)
     df = df.drop(columns=['ID'], axis=1)
     columns = df.columns.tolist()
-    cluster_columns = st.multiselect('Select columns for clustering', columns, default=columns[2:6])
+    cluster_columns = st.multiselect('Select columns for clustering', columns, default=columns[0:4])
     fake_data = df[cluster_columns].values
 
     try:
@@ -272,6 +272,9 @@ def kmeans():
                               line=dict(color="violet", width=1), name='min')
                 fig.add_shape(type="line", x0=0, y0=max_value, x1=len(cluster_df[column]) - 1, y1=max_value,
                               line=dict(color="red", width=1), name='max')
+                fig.add_annotation(x=-0.25, y=target_value, text="Target", showarrow=False, font=dict(color="green"))
+                fig.add_annotation(x=-0.25, y=min_value, text="Min", showarrow=False, font=dict(color="violet"))
+                fig.add_annotation(x=-0.25, y=max_value, text="Max", showarrow=False, font=dict(color="red"))
 
             fig.update_layout(title=f"Cluster Centers for {column}", xaxis_title="Cluster Index", yaxis_title=column)
             figures[column] = fig
@@ -732,14 +735,14 @@ def main():
         main_df, df1 = df_fitting_and_evaluation()
         main_df.drop(columns=['fitting_distance','Prediction', 'Evaluation','fitting_group'], inplace=True)
         st.dataframe(main_df, hide_index=True, width=1250)
+        st.header('Box-Cylinder Model Range ')
+        df_engineering_data_from_xlsx = pd.read_excel('Engineering_data.xlsx')
+        st.dataframe(df_engineering_data_from_xlsx, hide_index=True)
         tab1, tab2 = st.tabs(["Box-Plot", "Scatter-Plot"])
         with tab1:
             st.header("Box-Plot")
             box_plot()
         with tab2:
-            df_engineering_data_from_xlsx = pd.read_excel('Engineering_data.xlsx')
-            st.header('Box-Cylinder Model Range ')
-            st.dataframe(df_engineering_data_from_xlsx, hide_index=True)
             st.header("Scatter-Plot")
             scatter_plot()
 
