@@ -523,7 +523,7 @@ def decision_tree_viz():
         fig = ff.create_annotated_heatmap(z=confusion_matrix_df.values, x=labels, y=labels, colorscale='Blues')
 
         # Add title and axis labels
-        fig.update_layout(title='Confusion Matrix',
+        fig.update_layout(title='Confusion Matrix for Test Results',
                           xaxis=dict(title='Actual  Values'),
                           yaxis=dict(title='Predicted Values'))
 
