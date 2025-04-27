@@ -53,36 +53,32 @@ def prepare_DT_df():
     return df
 
 
-def Decision_Tress():
+def Probabilistic_Decision_Tree():
     df = prepare_DT_df()
 
     X = df.iloc[:, 0:6]
     y = df.iloc[:, 6]
-    #print(X, y)
-    #print(X, y)
 
     x_main, x_test, y_main, y_test = train_test_split(X, y, test_size=0.2, random_state=17, stratify=y)
     x_train, x_val, y_train, y_val = train_test_split(x_main, y_main, test_size=0.2, random_state=17, stratify=y_main)
 
+    # Create a Decision Tree with probabilistic behavior
     dtc = DecisionTreeClassifier(criterion='entropy', max_depth=6)
     dtc.fit(x_main, y_main)
 
     # Save the model
-    joblib.dump(dtc, 'decision_tree_model.joblib')
-    # Convert class names to strings
-    # class_names = df['evaluation_encoded'].unique().astype(str)
+    joblib.dump(dtc, 'probabilistic_decision_tree_model.joblib')
 
-    # This is Validation
-    y_pred_val = dtc.predict(x_val)
-    #print("Confusion Matrics for Validation:")
-    #print(confusion_matrix(y_val, y_pred_val))
-    #print("classification_report for Validation:")
-    #print(classification_report(y_val, y_pred_val))
+    # Instead of normal predict, use predict_proba + argmax to simulate probabilistic prediction
+    y_proba_val = dtc.predict_proba(x_val)
+    y_pred_val = y_proba_val.argmax(axis=1)
 
-    # this is for Testing
-    y_pred_test = dtc.predict(x_test)
+    y_proba_test = dtc.predict_proba(x_test)
+    y_pred_test = y_proba_test.argmax(axis=1)
+
     print("classification_report of TEST:")
     print(classification_report(y_test, y_pred_test))
+
     classification_report_val = classification_report(y_test, y_pred_test)
     confusion_matrix_test = confusion_matrix(y_test, y_pred_test)
     preci_value = precision_score(y_test, y_pred_test, average='weighted')
@@ -95,4 +91,4 @@ def Decision_Tress():
     return preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names
 
 
-Decision_Tress()
+Probabilistic_Decision_Tree()
