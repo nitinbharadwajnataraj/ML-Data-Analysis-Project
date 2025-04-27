@@ -19,6 +19,7 @@ from streamlit_flow import streamlit_flow
 from streamlit_flow.elements import StreamlitFlowNode, StreamlitFlowEdge
 from streamlit_flow.state import StreamlitFlowState
 from streamlit_flow.layouts import TreeLayout
+import json
 
 st.set_page_config(layout="wide")
 
@@ -503,8 +504,8 @@ def rename_dataframe_columns(df):
 
 def decision_tree_viz():
     preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Decision_Tress()
-    tab0, tab1, tab2, tab4 = st.tabs(
-        ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Decision Tree Visualization"])
+    tab0, tab1, tab2, tab4, tab5 = st.tabs(
+        ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Decision Tree Visualization", "Analysis"])
     preci_value = round(preci_value, 4)
     recall_value = round(recall_value, 4)
     accuracy_value = round(accuracy_value, 4)
@@ -795,11 +796,11 @@ def decision_tree_viz():
 
             traverse(0)
 
-            if 'tree_flow_state' not in st.session_state:
-                st.session_state.tree_flow_state = StreamlitFlowState(nodes, edges)
+            if 'tree_flow_state_dt' not in st.session_state:
+                st.session_state.tree_flow_state_dt = StreamlitFlowState(nodes, edges)
 
             updated_state = streamlit_flow('decision_tree_flow',
-                                        st.session_state.tree_flow_state,
+                                        st.session_state.tree_flow_state_dt,
                                         fit_view=True,
                                         get_node_on_click=True,
                                         get_edge_on_click=True)
@@ -816,10 +817,110 @@ def decision_tree_viz():
         preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Decision_Tress()
         visualize_decision_tree(dtc, feature_names)
 
+
+    with tab5:
+        st.header("Analyse via Image")
+
+        uploaded_file = st.file_uploader(
+            "Upload an Image (only .jpg, .jpeg, .png allowed)",
+            type=["jpg", "jpeg", "png"]
+        )
+
+        if uploaded_file:
+            st.image(uploaded_file, caption="Uploaded Image", use_container_width=True)
+
+        st.markdown("---")
+
+        # Check if tree canvas is already showing
+        if 'show_tree_canvas_dt' not in st.session_state:
+            st.session_state['show_tree_canvas_dt'] = False
+
+        # Only show the create button if tree canvas is not active
+        if not st.session_state['show_tree_canvas_dt']:
+            create_tree = st.button("Create your own Tree")
+            if create_tree:
+                st.session_state['show_tree_canvas_dt'] = True
+                st.rerun()
+        else:
+            # Only show close button when tree canvas is active
+            close_tree = st.button("Close Tree")
+            if close_tree:
+                st.session_state['show_tree_canvas_dt'] = False
+                st.rerun()
+
+        if st.session_state['show_tree_canvas_dt']:
+            # Removing the subheader that creates the white space
+            # st.subheader("Create your Tree Structure!") - removed this line
+            
+            # Set up initial state if not present
+            if 'canvas_state_dt' not in st.session_state:
+                st.session_state.canvas_state_dt = StreamlitFlowState([], [])
+
+            with st.container(): 
+                # Apply custom CSS to remove any padding or margin
+                st.markdown("""
+                    <style>
+                        /* Remove padding/margin from the flow container */
+                        #flow-container {
+                            background-color: transparent;
+                            padding: 0;
+                            margin: 0;
+                            border-radius: 0;
+                        }
+                        
+                        /* Remove any default Streamlit container padding */
+                        .element-container {
+                            margin-top: 0;
+                            padding-top: 0;
+                        }
+                    </style>
+                """, unsafe_allow_html=True)
+                
+                st.markdown('<div id="flow-container">', unsafe_allow_html=True)
+                st.info('Right click on the canvas to add Nodes and Edges')
+
+                # Draw your flow component
+                st.session_state.canvas_state_dt = streamlit_flow(
+                    'fully_interactive_flow',
+                    st.session_state.canvas_state_dt,
+                    fit_view=True,
+                    show_controls=True,
+                    allow_new_edges=True,
+                    animate_new_edges=True,
+                    layout=TreeLayout("right"),
+                    enable_pane_menu=True,
+                    enable_edge_menu=True,
+                    enable_node_menu=True,
+                )
+
+                st.markdown('</div>', unsafe_allow_html=True)
+
+            # Metrics
+            col1, col2 = st.columns(2)
+            col1.metric("Nodes", len(st.session_state.canvas_state_dt.nodes))
+            col2.metric("Edges", len(st.session_state.canvas_state_dt.edges))
+
+            st.markdown("---")
+
+            tree_data = {
+                "nodes": [node.__dict__ for node in st.session_state.canvas_state_dt.nodes],
+                "edges": [edge.__dict__ for edge in st.session_state.canvas_state_dt.edges]
+            }
+
+            tree_json = json.dumps(tree_data, indent=4)
+
+            # JSON download button
+            st.download_button(
+                label="Download Tree Structure (JSON)",
+                data=tree_json,
+                file_name="my_tree_structure.json",
+                mime="application/json"
+            )
+
 def probabilistic_decision_tree_viz():
     preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree()
-    tab0, tab1, tab2, tab4 = st.tabs(
-        ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Probabilistic Decision Tree Visualization"])
+    tab0, tab1, tab2, tab4, tab5 = st.tabs(
+        ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Probabilistic Decision Tree Visualization", "Analysis"])
     preci_value = round(preci_value, 4)
     recall_value = round(recall_value, 4)
     accuracy_value = round(accuracy_value, 4)
@@ -1130,6 +1231,105 @@ def probabilistic_decision_tree_viz():
                 st.info("Click on a node or edge to see its value.")
         preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree()
         visualize_probabilistic_decision_tree(dtc, feature_names)
+    
+    with tab5:
+        st.header("Analyse via Image")
+
+        uploaded_file = st.file_uploader(
+            "Upload an Image (only .jpg, .jpeg, .png allowed)",
+            type=["jpg", "jpeg", "png"]
+        )
+
+        if uploaded_file:
+            st.image(uploaded_file, caption="Uploaded Image", use_container_width=True)
+
+        st.markdown("---")
+
+        # Check if tree canvas is already showing
+        if 'show_tree_canvas' not in st.session_state:
+            st.session_state['show_tree_canvas'] = False
+
+        # Only show the create button if tree canvas is not active
+        if not st.session_state['show_tree_canvas']:
+            create_tree = st.button("Create your own Tree")
+            if create_tree:
+                st.session_state['show_tree_canvas'] = True
+                st.rerun()
+        else:
+            # Only show close button when tree canvas is active
+            close_tree = st.button("Close Tree")
+            if close_tree:
+                st.session_state['show_tree_canvas'] = False
+                st.rerun()
+
+        if st.session_state['show_tree_canvas']:
+            # Removing the subheader that creates the white space
+            # st.subheader("Create your Tree Structure!") - removed this line
+            
+            # Set up initial state if not present
+            if 'canvas_state' not in st.session_state:
+                st.session_state.canvas_state = StreamlitFlowState([], [])
+
+            with st.container(): 
+                # Apply custom CSS to remove any padding or margin
+                st.markdown("""
+                    <style>
+                        /* Remove padding/margin from the flow container */
+                        #flow-container {
+                            background-color: transparent;
+                            padding: 0;
+                            margin: 0;
+                            border-radius: 0;
+                        }
+                        
+                        /* Remove any default Streamlit container padding */
+                        .element-container {
+                            margin-top: 0;
+                            padding-top: 0;
+                        }
+                    </style>
+                """, unsafe_allow_html=True)
+                
+                st.markdown('<div id="flow-container">', unsafe_allow_html=True)
+                st.info('Right click on the canvas to add Nodes and Edges')
+
+                # Draw your flow component
+                st.session_state.canvas_state = streamlit_flow(
+                    'fully_interactive_flow',
+                    st.session_state.canvas_state,
+                    fit_view=True,
+                    show_controls=True,
+                    allow_new_edges=True,
+                    animate_new_edges=True,
+                    layout=TreeLayout("right"),
+                    enable_pane_menu=True,
+                    enable_edge_menu=True,
+                    enable_node_menu=True,
+                )
+
+                st.markdown('</div>', unsafe_allow_html=True)
+
+            # Metrics
+            col1, col2 = st.columns(2)
+            col1.metric("Nodes", len(st.session_state.canvas_state.nodes))
+            col2.metric("Edges", len(st.session_state.canvas_state.edges))
+
+            st.markdown("---")
+
+            tree_data = {
+                "nodes": [node.__dict__ for node in st.session_state.canvas_state.nodes],
+                "edges": [edge.__dict__ for edge in st.session_state.canvas_state.edges]
+            }
+
+            tree_json = json.dumps(tree_data, indent=4)
+
+            # JSON download button
+            st.download_button(
+                label="Download Tree Structure (JSON)",
+                data=tree_json,
+                file_name="my_tree_structure.json",
+                mime="application/json"
+            )
 
 def load_model():
     # Load the saved decision tree model
@@ -1241,7 +1441,7 @@ def main():
         st.header("Predictions for Synthetic Dataset")
         main_df, df1 = df_fitting_and_evaluation_PDT()
         st.dataframe(df1,hide_index=True,width=1250)
-        decision_tree_viz()
+        probabilistic_decision_tree_viz()
 
 if __name__ == "__main__":
     main()
