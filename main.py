@@ -882,6 +882,7 @@ def decision_tree_viz(depth):
     with tab5:
         st.header("Analyse via Image")
 
+        # Image upload section
         uploaded_file = st.file_uploader(
             "Upload an Image (only .jpg, .jpeg, .png allowed)",
             type=["jpg", "jpeg", "png"]
@@ -889,39 +890,40 @@ def decision_tree_viz(depth):
 
         if uploaded_file:
             st.image(uploaded_file, caption="Uploaded Image", use_container_width=True)
+            
+            # Add image analysis functionality here
+            st.info("Image analysis will be performed here. You can add your image processing code.")
+            
+            # Example placeholder for image analysis results
+            with st.expander("Image Analysis Results", expanded=False):
+                st.write("Your image analysis results will appear here.")
 
         st.markdown("---")
 
-        # Check if tree canvas is already showing
+        # Tree Canvas Management
         if 'show_tree_canvas_dt' not in st.session_state:
             st.session_state['show_tree_canvas_dt'] = False
 
-        # Only show the create button if tree canvas is not active
+        # Toggle button for tree canvas
         if not st.session_state['show_tree_canvas_dt']:
-            create_tree = st.button("Create your own Tree")
-            if create_tree:
+            if st.button("Create your own Tree"):
                 st.session_state['show_tree_canvas_dt'] = True
                 st.rerun()
         else:
-            # Only show close button when tree canvas is active
-            close_tree = st.button("Close Tree")
-            if close_tree:
+            if st.button("Close Tree"):
                 st.session_state['show_tree_canvas_dt'] = False
                 st.rerun()
 
+        # Tree Canvas Section
         if st.session_state['show_tree_canvas_dt']:
-            # Removing the subheader that creates the white space
-            # st.subheader("Create your Tree Structure!") - removed this line
-            
-            # Set up initial state if not present
+            # Initialize canvas state if not present
             if 'canvas_state_dt' not in st.session_state:
                 st.session_state.canvas_state_dt = StreamlitFlowState([], [])
 
             with st.container(): 
-                # Apply custom CSS to remove any padding or margin
+                # Apply custom CSS to remove padding/margin
                 st.markdown("""
                     <style>
-                        /* Remove padding/margin from the flow container */
                         #flow-container {
                             background-color: transparent;
                             padding: 0;
@@ -929,7 +931,6 @@ def decision_tree_viz(depth):
                             border-radius: 0;
                         }
                         
-                        /* Remove any default Streamlit container padding */
                         .element-container {
                             margin-top: 0;
                             padding-top: 0;
@@ -940,10 +941,10 @@ def decision_tree_viz(depth):
                 st.markdown('<div id="flow-container">', unsafe_allow_html=True)
                 st.info('Right click on the canvas to add Nodes and Edges')
 
-                # Draw your flow component
+                # Draw flow component
                 st.session_state.canvas_state_dt = streamlit_flow(
-                    'fully_interactive_flow',
-                    st.session_state.canvas_state_dt,
+                    key='fully_interactive_flow',
+                    state=st.session_state.canvas_state_dt,
                     fit_view=True,
                     show_controls=True,
                     allow_new_edges=True,
@@ -956,13 +957,14 @@ def decision_tree_viz(depth):
 
                 st.markdown('</div>', unsafe_allow_html=True)
 
-            # Metrics
+            # Metrics display
             col1, col2 = st.columns(2)
             col1.metric("Nodes", len(st.session_state.canvas_state_dt.nodes))
             col2.metric("Edges", len(st.session_state.canvas_state_dt.edges))
 
             st.markdown("---")
 
+            # Export functionality
             tree_data = {
                 "nodes": [node.__dict__ for node in st.session_state.canvas_state_dt.nodes],
                 "edges": [edge.__dict__ for edge in st.session_state.canvas_state_dt.edges]
@@ -976,6 +978,131 @@ def decision_tree_viz(depth):
                 data=tree_json,
                 file_name="my_tree_structure.json",
                 mime="application/json"
+            )
+
+        # Expert Insights Section
+        st.markdown("---")
+        st.markdown("### 💬 Expert Insights")
+        st.markdown('<div id="hypothesis-form-anchor"></div>', unsafe_allow_html=True)
+
+        # Initialize hypothesis state
+        if "submitted_hypotheses" not in st.session_state:
+            st.session_state["submitted_hypotheses"] = []
+        
+        # Initialize a reset flag
+        if "reset_form_dt" not in st.session_state:
+            st.session_state["reset_form_dt"] = False
+            
+        # Initialize default values for form fields
+        if "reset_form_dt" in st.session_state and st.session_state["reset_form_dt"]:
+            form_defaults = {
+                "failure_desc": "",
+                "imp_params": [],
+                "failure_name": "",
+                "hypo_prob": "Medium",
+                "fail_imp": "Medium"
+            }
+            # Reset the flag
+            st.session_state["reset_form_dt"] = False
+        else:
+            form_defaults = {
+                "failure_desc": st.session_state.get("failure_desc_dt", ""),
+                "imp_params": st.session_state.get("imp_params_dt", []),
+                "failure_name": st.session_state.get("failure_name_dt", ""),
+                "hypo_prob": st.session_state.get("hypo_prob_dt", "Medium"),
+                "fail_imp": st.session_state.get("fail_imp_dt", "Medium")
+            }
+
+        # Domain Hypothesis Form
+        with st.container():
+            with st.expander("💬 Domain Hypothesis", expanded=False):
+                with st.form(key="domain_hypothesis_form_dt"):
+                    st.markdown("### 📌 Domain Hypothesis Entry")
+
+                    failure_description = st.text_area(
+                        "📝 Describe the failure case", 
+                        value=form_defaults["failure_desc"],
+                        key="failure_desc_dt"
+                    )
+
+                    important_parameters = st.multiselect(
+                        "📊 Which parameters are most important?",
+                        options=["Box Hole Diameter", "Box Hole Depth", "Cylinder Diameter", "Cylinder Height", "Other"],
+                        default=form_defaults["imp_params"],
+                        key="imp_params_dt"
+                    )
+
+                    failure_name = st.text_input(
+                        "❗ Name this failure (e.g., 'Exploded Weld')", 
+                        value=form_defaults["failure_name"],
+                        key="failure_name_dt"
+                    )
+
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        hypothesis_probability = st.selectbox(
+                            "🔮 How likely is this hypothesis?",
+                            options=["High", "Medium", "Low"],
+                            index=["High", "Medium", "Low"].index(form_defaults["hypo_prob"]),
+                            key="hypo_prob_dt"
+                        )
+
+                    with col2:
+                        failure_importance = st.selectbox(
+                            "🔥 How important is this failure?",
+                            options=["High", "Medium", "Low"],
+                            index=["High", "Medium", "Low"].index(form_defaults["fail_imp"]),
+                            key="fail_imp_dt"
+                        )
+
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        submitted = st.form_submit_button("Submit Hypothesis")
+                    with col2:
+                        clear_form = st.form_submit_button("Clear Form")
+
+                    # Handle form submission
+                    if submitted:
+                        # Validate inputs before submission
+                        if not failure_description or not failure_name:
+                            st.error("Please fill in the required fields: Description and Failure Name")
+                        else:
+                            # Get current timestamp using datetime module
+                            from datetime import datetime
+                            entry = {
+                                "Description": failure_description,
+                                "Important Parameters": ", ".join(important_parameters) if important_parameters else "None specified",
+                                "Failure Name": failure_name,
+                                "Hypothesis Probability": hypothesis_probability,
+                                "Failure Importance": failure_importance,
+                                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            }
+                            st.session_state["submitted_hypotheses"].append(entry)
+                            st.success("✅ Hypothesis submitted successfully!")
+
+                            st.markdown("#### 🧾 Summary of Hypothesis")
+                            for k, v in entry.items():
+                                if k != "Timestamp":  # Don't show timestamp in the summary
+                                    st.markdown(f"- **{k}**: {v}")
+                    
+                    # Handle form clearing
+                    if clear_form:
+                        # Set the reset flag for the next rerun
+                        st.session_state["reset_form_dt"] = True
+                        st.rerun()
+
+        # Display and export submitted hypotheses
+        if st.session_state["submitted_hypotheses"]:
+            with st.expander("View All Submitted Hypotheses", expanded=False):
+                df_hypo = pd.DataFrame(st.session_state["submitted_hypotheses"])
+                st.dataframe(df_hypo)
+                
+            csv_data = pd.DataFrame(st.session_state["submitted_hypotheses"]).to_csv(index=False).encode("utf-8")
+            st.download_button(
+                label="💾 Download Hypotheses as CSV",
+                data=csv_data,
+                file_name="domain_hypotheses.csv",
+                mime="text/csv"
             )
 
 def probabilistic_decision_tree_viz(depth):
@@ -1357,6 +1484,7 @@ def probabilistic_decision_tree_viz(depth):
     with tab5:
         st.header("Analyse via Image")
 
+        # Image upload section
         uploaded_file = st.file_uploader(
             "Upload an Image (only .jpg, .jpeg, .png allowed)",
             type=["jpg", "jpeg", "png"]
@@ -1364,39 +1492,40 @@ def probabilistic_decision_tree_viz(depth):
 
         if uploaded_file:
             st.image(uploaded_file, caption="Uploaded Image", use_container_width=True)
+            
+            # Add image analysis functionality here
+            st.info("Image analysis will be performed here. You can add your image processing code.")
+            
+            # Example placeholder for image analysis results
+            with st.expander("Image Analysis Results", expanded=False):
+                st.write("Your image analysis results will appear here.")
 
         st.markdown("---")
 
-        # Check if tree canvas is already showing
-        if 'show_tree_canvas' not in st.session_state:
-            st.session_state['show_tree_canvas'] = False
+        # Tree Canvas Management
+        if 'show_tree_canvas_dt' not in st.session_state:
+            st.session_state['show_tree_canvas_dt'] = False
 
-        # Only show the create button if tree canvas is not active
-        if not st.session_state['show_tree_canvas']:
-            create_tree = st.button("Create your own Tree")
-            if create_tree:
-                st.session_state['show_tree_canvas'] = True
+        # Toggle button for tree canvas
+        if not st.session_state['show_tree_canvas_dt']:
+            if st.button("Create your own Tree"):
+                st.session_state['show_tree_canvas_dt'] = True
                 st.rerun()
         else:
-            # Only show close button when tree canvas is active
-            close_tree = st.button("Close Tree")
-            if close_tree:
-                st.session_state['show_tree_canvas'] = False
+            if st.button("Close Tree"):
+                st.session_state['show_tree_canvas_dt'] = False
                 st.rerun()
 
-        if st.session_state['show_tree_canvas']:
-            # Removing the subheader that creates the white space
-            # st.subheader("Create your Tree Structure!") - removed this line
-            
-            # Set up initial state if not present
-            if 'canvas_state' not in st.session_state:
-                st.session_state.canvas_state = StreamlitFlowState([], [])
+        # Tree Canvas Section
+        if st.session_state['show_tree_canvas_dt']:
+            # Initialize canvas state if not present
+            if 'canvas_state_dt' not in st.session_state:
+                st.session_state.canvas_state_dt = StreamlitFlowState([], [])
 
             with st.container(): 
-                # Apply custom CSS to remove any padding or margin
+                # Apply custom CSS to remove padding/margin
                 st.markdown("""
                     <style>
-                        /* Remove padding/margin from the flow container */
                         #flow-container {
                             background-color: transparent;
                             padding: 0;
@@ -1404,7 +1533,6 @@ def probabilistic_decision_tree_viz(depth):
                             border-radius: 0;
                         }
                         
-                        /* Remove any default Streamlit container padding */
                         .element-container {
                             margin-top: 0;
                             padding-top: 0;
@@ -1415,10 +1543,10 @@ def probabilistic_decision_tree_viz(depth):
                 st.markdown('<div id="flow-container">', unsafe_allow_html=True)
                 st.info('Right click on the canvas to add Nodes and Edges')
 
-                # Draw your flow component
-                st.session_state.canvas_state = streamlit_flow(
-                    'fully_interactive_flow',
-                    st.session_state.canvas_state,
+                # Draw flow component
+                st.session_state.canvas_state_dt = streamlit_flow(
+                    key='fully_interactive_flow',
+                    state=st.session_state.canvas_state_dt,
                     fit_view=True,
                     show_controls=True,
                     allow_new_edges=True,
@@ -1431,16 +1559,17 @@ def probabilistic_decision_tree_viz(depth):
 
                 st.markdown('</div>', unsafe_allow_html=True)
 
-            # Metrics
+            # Metrics display
             col1, col2 = st.columns(2)
-            col1.metric("Nodes", len(st.session_state.canvas_state.nodes))
-            col2.metric("Edges", len(st.session_state.canvas_state.edges))
+            col1.metric("Nodes", len(st.session_state.canvas_state_dt.nodes))
+            col2.metric("Edges", len(st.session_state.canvas_state_dt.edges))
 
             st.markdown("---")
 
+            # Export functionality
             tree_data = {
-                "nodes": [node.__dict__ for node in st.session_state.canvas_state.nodes],
-                "edges": [edge.__dict__ for edge in st.session_state.canvas_state.edges]
+                "nodes": [node.__dict__ for node in st.session_state.canvas_state_dt.nodes],
+                "edges": [edge.__dict__ for edge in st.session_state.canvas_state_dt.edges]
             }
 
             tree_json = json.dumps(tree_data, indent=4)
@@ -1451,6 +1580,131 @@ def probabilistic_decision_tree_viz(depth):
                 data=tree_json,
                 file_name="my_tree_structure.json",
                 mime="application/json"
+            )
+
+        # Expert Insights Section
+        st.markdown("---")
+        st.markdown("### 💬 Expert Insights")
+        st.markdown('<div id="hypothesis-form-anchor"></div>', unsafe_allow_html=True)
+
+        # Initialize hypothesis state
+        if "submitted_hypotheses" not in st.session_state:
+            st.session_state["submitted_hypotheses"] = []
+        
+        # Initialize a reset flag
+        if "reset_form_dt" not in st.session_state:
+            st.session_state["reset_form_dt"] = False
+            
+        # Initialize default values for form fields
+        if "reset_form_dt" in st.session_state and st.session_state["reset_form_dt"]:
+            form_defaults = {
+                "failure_desc": "",
+                "imp_params": [],
+                "failure_name": "",
+                "hypo_prob": "Medium",
+                "fail_imp": "Medium"
+            }
+            # Reset the flag
+            st.session_state["reset_form_dt"] = False
+        else:
+            form_defaults = {
+                "failure_desc": st.session_state.get("failure_desc_dt", ""),
+                "imp_params": st.session_state.get("imp_params_dt", []),
+                "failure_name": st.session_state.get("failure_name_dt", ""),
+                "hypo_prob": st.session_state.get("hypo_prob_dt", "Medium"),
+                "fail_imp": st.session_state.get("fail_imp_dt", "Medium")
+            }
+
+        # Domain Hypothesis Form
+        with st.container():
+            with st.expander("💬 Domain Hypothesis", expanded=False):
+                with st.form(key="domain_hypothesis_form_dt"):
+                    st.markdown("### 📌 Domain Hypothesis Entry")
+
+                    failure_description = st.text_area(
+                        "📝 Describe the failure case", 
+                        value=form_defaults["failure_desc"],
+                        key="failure_desc_dt"
+                    )
+
+                    important_parameters = st.multiselect(
+                        "📊 Which parameters are most important?",
+                        options=["Box Hole Diameter", "Box Hole Depth", "Cylinder Diameter", "Cylinder Height", "Other"],
+                        default=form_defaults["imp_params"],
+                        key="imp_params_dt"
+                    )
+
+                    failure_name = st.text_input(
+                        "❗ Name this failure (e.g., 'Exploded Weld')", 
+                        value=form_defaults["failure_name"],
+                        key="failure_name_dt"
+                    )
+
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        hypothesis_probability = st.selectbox(
+                            "🔮 How likely is this hypothesis?",
+                            options=["High", "Medium", "Low"],
+                            index=["High", "Medium", "Low"].index(form_defaults["hypo_prob"]),
+                            key="hypo_prob_dt"
+                        )
+
+                    with col2:
+                        failure_importance = st.selectbox(
+                            "🔥 How important is this failure?",
+                            options=["High", "Medium", "Low"],
+                            index=["High", "Medium", "Low"].index(form_defaults["fail_imp"]),
+                            key="fail_imp_dt"
+                        )
+
+                    col1, col2 = st.columns(2)
+                    with col1:
+                        submitted = st.form_submit_button("Submit Hypothesis")
+                    with col2:
+                        clear_form = st.form_submit_button("Clear Form")
+
+                    # Handle form submission
+                    if submitted:
+                        # Validate inputs before submission
+                        if not failure_description or not failure_name:
+                            st.error("Please fill in the required fields: Description and Failure Name")
+                        else:
+                            # Get current timestamp using datetime module
+                            from datetime import datetime
+                            entry = {
+                                "Description": failure_description,
+                                "Important Parameters": ", ".join(important_parameters) if important_parameters else "None specified",
+                                "Failure Name": failure_name,
+                                "Hypothesis Probability": hypothesis_probability,
+                                "Failure Importance": failure_importance,
+                                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                            }
+                            st.session_state["submitted_hypotheses"].append(entry)
+                            st.success("✅ Hypothesis submitted successfully!")
+
+                            st.markdown("#### 🧾 Summary of Hypothesis")
+                            for k, v in entry.items():
+                                if k != "Timestamp":  # Don't show timestamp in the summary
+                                    st.markdown(f"- **{k}**: {v}")
+                    
+                    # Handle form clearing
+                    if clear_form:
+                        # Set the reset flag for the next rerun
+                        st.session_state["reset_form_dt"] = True
+                        st.rerun()
+
+        # Display and export submitted hypotheses
+        if st.session_state["submitted_hypotheses"]:
+            with st.expander("View All Submitted Hypotheses", expanded=False):
+                df_hypo = pd.DataFrame(st.session_state["submitted_hypotheses"])
+                st.dataframe(df_hypo)
+                
+            csv_data = pd.DataFrame(st.session_state["submitted_hypotheses"]).to_csv(index=False).encode("utf-8")
+            st.download_button(
+                label="💾 Download Hypotheses as CSV",
+                data=csv_data,
+                file_name="domain_hypotheses.csv",
+                mime="text/csv"
             )
 
 def load_model():
