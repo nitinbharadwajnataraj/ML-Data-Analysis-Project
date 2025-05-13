@@ -502,8 +502,8 @@ def rename_dataframe_columns(df):
     })
     return df
 
-def decision_tree_viz():
-    preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Decision_Tress()
+def decision_tree_viz(depth):
+    preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Decision_Tress(depth)
     tab0, tab1, tab2, tab4, tab5 = st.tabs(
         ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Decision Tree Visualization", "Analysis"])
     preci_value = round(preci_value, 4)
@@ -728,93 +728,124 @@ def decision_tree_viz():
             nodes = []
             edges = []
 
-            def node_id(node_idx):
-                return f"node_{node_idx}"
+            def node_id(idx): return f"node_{idx}"
 
-            # Maps for quick lookup
             node_content_map = {}
             edge_label_map = {}
 
+            path_filter = st.selectbox("🔍 Filter & Show Paths", ["All", "OK", "NOK"])
+            class_map = {"OK": 1, "NOK": 0}
+
+            def keep_subtree(node_idx, target_class):
+                """Check if any leaf node under this node leads to the target class"""
+                is_leaf = dtc.tree_.feature[node_idx] == -2
+                if is_leaf:
+                    values = dtc.tree_.value[node_idx][0]
+                    predicted_class = dtc.classes_[values.argmax()]
+                    return predicted_class == target_class
+                left = dtc.tree_.children_left[node_idx]
+                right = dtc.tree_.children_right[node_idx]
+                return keep_subtree(left, target_class) or keep_subtree(right, target_class)
+
             def traverse(node_idx, depth=0, pos_x=100, pos_y=100):
-                if dtc.tree_.feature[node_idx] != -2:  # not a leaf node
+                if path_filter in ["OK", "NOK"]:
+                    if not keep_subtree(node_idx, class_map[path_filter]):
+                        return
+
+                is_leaf = dtc.tree_.feature[node_idx] == -2
+                nid = node_id(node_idx)
+
+                if is_leaf:
+                    values = dtc.tree_.value[node_idx][0]
+                    predicted_class = dtc.classes_[values.argmax()]
+                    label = f"Predict: {'OK' if predicted_class == 1 else 'NOK'}"
+                    color = "#90EE90" if predicted_class == 1 else "#FFCCCB"
+                else:
                     feature = feature_names[dtc.tree_.feature[node_idx]]
                     threshold = dtc.tree_.threshold[node_idx]
                     label = f"{feature} <= {threshold:.2f}"
-                else:  # leaf node
-                    classes = dtc.classes_
-                    values = dtc.tree_.value[node_idx][0]
-                    predicted_class = classes[values.argmax()]
-                    if predicted_class == 1:
-                        label = "Predict: OK"
-                    else:
-                        label = "Predict: NOK"
+                    color = "#ADD8E6"
 
-                node = StreamlitFlowNode(
-                    id=node_id(node_idx),
+                style = {
+                    "backgroundColor": color,
+                    "border": "2px solid black",
+                    "opacity": "1.0"
+                }
+
+                nodes.append(StreamlitFlowNode(
+                    id=nid,
                     pos=(pos_x, pos_y),
-                    data={'content': label},
-                    node_type='default',
-                    source_position='right',
-                    target_position='left',
-                    draggable=True
-                )
-                nodes.append(node)
+                    data={"content": label},
+                    node_type="default",
+                    source_position="right",
+                    target_position="left",
+                    draggable=True,
+                    style=style
+                ))
+                node_content_map[nid] = label
 
-                node_content_map[node_id(node_idx)] = label
+                if not is_leaf:
+                    left = dtc.tree_.children_left[node_idx]
+                    right = dtc.tree_.children_right[node_idx]
 
-                if dtc.tree_.feature[node_idx] != -2:
-                    left_child = dtc.tree_.children_left[node_idx]
-                    right_child = dtc.tree_.children_right[node_idx]
+                    spacing_x = 500
+                    spacing_y = 300
 
-                    x_spacing = 500
-                    y_spacing = 300
+                    if path_filter == "All" or keep_subtree(left, class_map.get(path_filter, None)):
+                        traverse(left, depth + 1, pos_x + spacing_x, pos_y - spacing_y // (depth + 1))
+                        edge_id = f"{nid}-{node_id(left)}"
+                        edges.append(StreamlitFlowEdge(
+                            id=edge_id,
+                            source=nid,
+                            target=node_id(left),
+                            label="True",
+                            animated=True,
+                            style={"stroke": "green", "strokeWidth": "2px"}
+                        ))
+                        edge_label_map[edge_id] = "True"
 
-                    traverse(left_child, depth + 1, pos_x + x_spacing, pos_y - y_spacing // (depth + 1))
-                    traverse(right_child, depth + 1, pos_x + x_spacing, pos_y + y_spacing // (depth + 1))
-
-                    # Add edges
-                    left_edge_id = f"{node_id(node_idx)}-{node_id(left_child)}"
-                    right_edge_id = f"{node_id(node_idx)}-{node_id(right_child)}"
-
-                    edges.append(StreamlitFlowEdge(
-                        id=left_edge_id,
-                        source=node_id(node_idx),
-                        target=node_id(left_child),
-                        animated=True,
-                        label="True"
-                    ))
-                    edges.append(StreamlitFlowEdge(
-                        id=right_edge_id,
-                        source=node_id(node_idx),
-                        target=node_id(right_child),
-                        animated=True,
-                        label="False"
-                    ))
-
-                    edge_label_map[left_edge_id] = "True"
-                    edge_label_map[right_edge_id] = "False"
+                    if path_filter == "All" or keep_subtree(right, class_map.get(path_filter, None)):
+                        traverse(right, depth + 1, pos_x + spacing_x, pos_y + spacing_y // (depth + 1))
+                        edge_id = f"{nid}-{node_id(right)}"
+                        edges.append(StreamlitFlowEdge(
+                            id=edge_id,
+                            source=nid,
+                            target=node_id(right),
+                            label="False",
+                            animated=True,
+                            style={"stroke": "red", "strokeWidth": "2px"}
+                        ))
+                        edge_label_map[edge_id] = "False"
 
             traverse(0)
 
-            if 'tree_flow_state_dt' not in st.session_state:
+            st.markdown("### 🌳 Decision Tree Visualization")
+
+            if (
+                "tree_flow_state_dt" not in st.session_state or
+                st.session_state.get("last_filter_dt") != path_filter or
+                st.session_state.get("last_depth_dt") != dtc.get_depth()
+            ):
                 st.session_state.tree_flow_state_dt = StreamlitFlowState(nodes, edges)
+                st.session_state.last_filter_dt = path_filter
+                st.session_state.last_depth_dt = dtc.get_depth()
 
-            updated_state = streamlit_flow('decision_tree_flow',
-                                        st.session_state.tree_flow_state_dt,
-                                        fit_view=True,
-                                        get_node_on_click=True,
-                                        get_edge_on_click=True)
+            updated_state = streamlit_flow(
+                'decision_tree_flow',
+                st.session_state.tree_flow_state_dt,
+                fit_view=True,
+                get_node_on_click=True,
+                get_edge_on_click=True
+            )
 
-            # Detect if node or edge was clicked
             selected_id = updated_state.selected_id
-
             if selected_id in node_content_map:
                 st.success(f"Clicked Node Content: {node_content_map[selected_id]}")
             elif selected_id in edge_label_map:
                 st.success(f"Clicked Edge Label: {edge_label_map[selected_id]}")
             else:
                 st.info("Click on a node or edge to see its value.")
-        preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Decision_Tress()
+        preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Decision_Tress(depth)
         visualize_decision_tree(dtc, feature_names)
 
 
@@ -917,8 +948,8 @@ def decision_tree_viz():
                 mime="application/json"
             )
 
-def probabilistic_decision_tree_viz():
-    preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree()
+def probabilistic_decision_tree_viz(depth):
+    preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree(depth)
     tab0, tab1, tab2, tab4, tab5 = st.tabs(
         ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Probabilistic Decision Tree Visualization", "Analysis"])
     preci_value = round(preci_value, 4)
@@ -1143,93 +1174,125 @@ def probabilistic_decision_tree_viz():
             nodes = []
             edges = []
 
-            def node_id(node_idx):
-                return f"node_{node_idx}"
+            def node_id(idx): return f"node_{idx}"
 
-            # Maps for quick lookup
             node_content_map = {}
             edge_label_map = {}
 
+            path_filter = st.selectbox("🔍 Filter & Show Paths", ["All", "OK", "NOK"])
+            class_map = {"OK": 1, "NOK": 0}
+
+            def keep_subtree(node_idx, target_class):
+                """Check if any leaf node under this node leads to the target class"""
+                is_leaf = dtc.tree_.feature[node_idx] == -2
+                if is_leaf:
+                    values = dtc.tree_.value[node_idx][0]
+                    predicted_class = dtc.classes_[values.argmax()]
+                    return predicted_class == target_class
+                left = dtc.tree_.children_left[node_idx]
+                right = dtc.tree_.children_right[node_idx]
+                return keep_subtree(left, target_class) or keep_subtree(right, target_class)
+
             def traverse(node_idx, depth=0, pos_x=100, pos_y=100):
-                if dtc.tree_.feature[node_idx] != -2:  # not a leaf node
+                if path_filter in ["OK", "NOK"]:
+                    if not keep_subtree(node_idx, class_map[path_filter]):
+                        return
+
+                is_leaf = dtc.tree_.feature[node_idx] == -2
+                nid = node_id(node_idx)
+
+                if is_leaf:
+                    values = dtc.tree_.value[node_idx][0]
+                    predicted_class = dtc.classes_[values.argmax()]
+                    label = f"Predict: {'OK' if predicted_class == 1 else 'NOK'}"
+                    color = "#90EE90" if predicted_class == 1 else "#FFCCCB"
+                else:
                     feature = feature_names[dtc.tree_.feature[node_idx]]
                     threshold = dtc.tree_.threshold[node_idx]
                     label = f"{feature} <= {threshold:.2f}"
-                else:  # leaf node
-                    classes = dtc.classes_
-                    values = dtc.tree_.value[node_idx][0]
-                    predicted_class = classes[values.argmax()]
-                    if predicted_class == 1:
-                        label = "Predict: OK"
-                    else:
-                        label = "Predict: NOK"
+                    color = "#ADD8E6"
 
-                node = StreamlitFlowNode(
-                    id=node_id(node_idx),
+                style = {
+                    "backgroundColor": color,
+                    "border": "2px solid black",
+                    "opacity": "1.0"
+                }
+
+                nodes.append(StreamlitFlowNode(
+                    id=nid,
                     pos=(pos_x, pos_y),
-                    data={'content': label},
-                    node_type='default',
-                    source_position='right',
-                    target_position='left',
-                    draggable=True
-                )
-                nodes.append(node)
+                    data={"content": label},
+                    node_type="default",
+                    source_position="right",
+                    target_position="left",
+                    draggable=True,
+                    style=style
+                ))
+                node_content_map[nid] = label
 
-                node_content_map[node_id(node_idx)] = label
+                if not is_leaf:
+                    left = dtc.tree_.children_left[node_idx]
+                    right = dtc.tree_.children_right[node_idx]
 
-                if dtc.tree_.feature[node_idx] != -2:
-                    left_child = dtc.tree_.children_left[node_idx]
-                    right_child = dtc.tree_.children_right[node_idx]
+                    spacing_x = 500
+                    spacing_y = 300
 
-                    x_spacing = 500
-                    y_spacing = 300
+                    if path_filter == "All" or keep_subtree(left, class_map.get(path_filter, None)):
+                        traverse(left, depth + 1, pos_x + spacing_x, pos_y - spacing_y // (depth + 1))
+                        edge_id = f"{nid}-{node_id(left)}"
+                        edges.append(StreamlitFlowEdge(
+                            id=edge_id,
+                            source=nid,
+                            target=node_id(left),
+                            label="True",
+                            animated=True,
+                            style={"stroke": "green", "strokeWidth": "2px"}
+                        ))
+                        edge_label_map[edge_id] = "True"
 
-                    traverse(left_child, depth + 1, pos_x + x_spacing, pos_y - y_spacing // (depth + 1))
-                    traverse(right_child, depth + 1, pos_x + x_spacing, pos_y + y_spacing // (depth + 1))
-
-                    # Add edges
-                    left_edge_id = f"{node_id(node_idx)}-{node_id(left_child)}"
-                    right_edge_id = f"{node_id(node_idx)}-{node_id(right_child)}"
-
-                    edges.append(StreamlitFlowEdge(
-                        id=left_edge_id,
-                        source=node_id(node_idx),
-                        target=node_id(left_child),
-                        animated=True,
-                        label="True"
-                    ))
-                    edges.append(StreamlitFlowEdge(
-                        id=right_edge_id,
-                        source=node_id(node_idx),
-                        target=node_id(right_child),
-                        animated=True,
-                        label="False"
-                    ))
-
-                    edge_label_map[left_edge_id] = "True"
-                    edge_label_map[right_edge_id] = "False"
+                    if path_filter == "All" or keep_subtree(right, class_map.get(path_filter, None)):
+                        traverse(right, depth + 1, pos_x + spacing_x, pos_y + spacing_y // (depth + 1))
+                        edge_id = f"{nid}-{node_id(right)}"
+                        edges.append(StreamlitFlowEdge(
+                            id=edge_id,
+                            source=nid,
+                            target=node_id(right),
+                            label="False",
+                            animated=True,
+                            style={"stroke": "red", "strokeWidth": "2px"}
+                        ))
+                        edge_label_map[edge_id] = "False"
 
             traverse(0)
 
-            if 'tree_flow_state' not in st.session_state:
-                st.session_state.tree_flow_state = StreamlitFlowState(nodes, edges)
+            st.markdown("### 🌳 Decision Tree Visualization")
 
-            updated_state = streamlit_flow('decision_tree_flow',
-                                        st.session_state.tree_flow_state,
-                                        fit_view=True,
-                                        get_node_on_click=True,
-                                        get_edge_on_click=True)
+            if (
+                "tree_flow_state_prob_dt" not in st.session_state or
+                st.session_state.get("last_filter_prob_dt") != path_filter or
+                st.session_state.get("last_depth_prob_dt") != dtc.get_depth()
+            ):
+                st.session_state.tree_flow_state_prob_dt = StreamlitFlowState(nodes, edges)
+                st.session_state.last_filter_prob_dt = path_filter
+                st.session_state.last_depth_prob_dt = dtc.get_depth()
 
-            # Detect if node or edge was clicked
+            updated_state = streamlit_flow(
+                'decision_tree_flow',
+                st.session_state.tree_flow_state_prob_dt,
+                fit_view=True,
+                get_node_on_click=True,
+                get_edge_on_click=True
+            )
+
             selected_id = updated_state.selected_id
-
             if selected_id in node_content_map:
                 st.success(f"Clicked Node Content: {node_content_map[selected_id]}")
             elif selected_id in edge_label_map:
                 st.success(f"Clicked Edge Label: {edge_label_map[selected_id]}")
             else:
                 st.info("Click on a node or edge to see its value.")
-        preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree()
+        
+        preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree(depth)
         visualize_probabilistic_decision_tree(dtc, feature_names)
     
     with tab5:
@@ -1435,13 +1498,15 @@ def main():
         st.header("Predictions for Synthetic Dataset")
         main_df, df1 = df_fitting_and_evaluation()
         st.dataframe(df1,hide_index=True,width=1250)
-        decision_tree_viz()
+        depth = st.slider("Select the Depth of the Decision Tree", min_value=1, max_value=6, value=4, step=1)
+        decision_tree_viz(depth)
     
     elif selected_section == 'Probabilistic Decision Tree':
         st.header("Predictions for Synthetic Dataset")
         main_df, df1 = df_fitting_and_evaluation_PDT()
         st.dataframe(df1,hide_index=True,width=1250)
-        probabilistic_decision_tree_viz()
+        depth = st.slider("Select the Depth of the Probabilistic Tree", min_value=1, max_value=6, value=4, step=1)
+        probabilistic_decision_tree_viz(depth)
 
 if __name__ == "__main__":
     main()

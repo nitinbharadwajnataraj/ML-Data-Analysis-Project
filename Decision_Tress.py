@@ -53,7 +53,7 @@ def prepare_DT_df():
     return df
 
 
-def Decision_Tress():
+def Decision_Tress(depth):
     df = prepare_DT_df()
 
     X = df.iloc[:, 0:6]
@@ -64,7 +64,7 @@ def Decision_Tress():
     x_main, x_test, y_main, y_test = train_test_split(X, y, test_size=0.2, random_state=17, stratify=y)
     x_train, x_val, y_train, y_val = train_test_split(x_main, y_main, test_size=0.2, random_state=17, stratify=y_main)
 
-    dtc = DecisionTreeClassifier(criterion='entropy', max_depth=6)
+    dtc = DecisionTreeClassifier(criterion='entropy', max_depth=depth)
     dtc.fit(x_main, y_main)
 
     # Save the model
@@ -95,4 +95,4 @@ def Decision_Tress():
     return preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names
 
 
-Decision_Tress()
+#Decision_Tress()

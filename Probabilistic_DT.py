@@ -53,17 +53,18 @@ def prepare_DT_df():
     return df
 
 
-def Probabilistic_Decision_Tree():
+def Probabilistic_Decision_Tree(depth):
     df = prepare_DT_df()
-
+    #print(df.head())
     X = df.iloc[:, 0:6]
     y = df.iloc[:, 6]
-
+    #print('x: ',X)
+    #print('y: ',y)
     x_main, x_test, y_main, y_test = train_test_split(X, y, test_size=0.2, random_state=17, stratify=y)
     x_train, x_val, y_train, y_val = train_test_split(x_main, y_main, test_size=0.2, random_state=17, stratify=y_main)
 
     # Create a Decision Tree with probabilistic behavior
-    dtc = DecisionTreeClassifier(criterion='entropy', max_depth=6)
+    dtc = DecisionTreeClassifier(criterion='entropy', max_depth=depth)
     dtc.fit(x_main, y_main)
 
     # Save the model
@@ -91,4 +92,4 @@ def Probabilistic_Decision_Tree():
     return preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names
 
 
-Probabilistic_Decision_Tree()
+#Probabilistic_Decision_Tree()
