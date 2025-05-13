@@ -20,6 +20,7 @@ from streamlit_flow.elements import StreamlitFlowNode, StreamlitFlowEdge
 from streamlit_flow.state import StreamlitFlowState
 from streamlit_flow.layouts import TreeLayout
 import json
+from openai import OpenAI
 
 st.set_page_config(layout="wide")
 
@@ -845,8 +846,37 @@ def decision_tree_viz(depth):
                 st.success(f"Clicked Edge Label: {edge_label_map[selected_id]}")
             else:
                 st.info("Click on a node or edge to see its value.")
+            # Extract full tree as JSON
+            def extract_tree_json(node_idx):
+                is_leaf = dtc.tree_.feature[node_idx] == -2
+                if is_leaf:
+                    values = dtc.tree_.value[node_idx][0]
+                    predicted_class = dtc.classes_[values.argmax()]
+                    return {
+                        "id": node_idx,
+                        "type": "leaf",
+                        "prediction": "OK" if predicted_class == 1 else "NOK",
+                        "samples": int(sum(values)),
+                        "class_distribution": values.tolist()
+                    }
+                else:
+                    feature = feature_names[dtc.tree_.feature[node_idx]]
+                    threshold = dtc.tree_.threshold[node_idx]
+                    left_idx = dtc.tree_.children_left[node_idx]
+                    right_idx = dtc.tree_.children_right[node_idx]
+                    return {
+                        "id": node_idx,
+                        "type": "split",
+                        "feature": feature,
+                        "threshold": threshold,
+                        "left": extract_tree_json(left_idx),
+                        "right": extract_tree_json(right_idx)
+                    }
+            tree_json = extract_tree_json(0)
+            return tree_json    
         preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Decision_Tress(depth)
-        visualize_decision_tree(dtc, feature_names)
+        json = visualize_decision_tree(dtc, feature_names)
+        llm_analysis(json)
 
 
     with tab5:
@@ -1291,10 +1321,39 @@ def probabilistic_decision_tree_viz(depth):
                 st.success(f"Clicked Edge Label: {edge_label_map[selected_id]}")
             else:
                 st.info("Click on a node or edge to see its value.")
+            # Extract full tree as JSON
+            def extract_tree_json(node_idx):
+                is_leaf = dtc.tree_.feature[node_idx] == -2
+                if is_leaf:
+                    values = dtc.tree_.value[node_idx][0]
+                    predicted_class = dtc.classes_[values.argmax()]
+                    return {
+                        "id": node_idx,
+                        "type": "leaf",
+                        "prediction": "OK" if predicted_class == 1 else "NOK",
+                        "samples": int(sum(values)),
+                        "class_distribution": values.tolist()
+                    }
+                else:
+                    feature = feature_names[dtc.tree_.feature[node_idx]]
+                    threshold = dtc.tree_.threshold[node_idx]
+                    left_idx = dtc.tree_.children_left[node_idx]
+                    right_idx = dtc.tree_.children_right[node_idx]
+                    return {
+                        "id": node_idx,
+                        "type": "split",
+                        "feature": feature,
+                        "threshold": threshold,
+                        "left": extract_tree_json(left_idx),
+                        "right": extract_tree_json(right_idx)
+                    }
+            tree_json = extract_tree_json(0)
+            return tree_json
         
         preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree(depth)
-        visualize_probabilistic_decision_tree(dtc, feature_names)
-    
+        json = visualize_probabilistic_decision_tree(dtc, feature_names)
+        llm_analysis(json)
+        
     with tab5:
         st.header("Analyse via Image")
 
@@ -1450,6 +1509,63 @@ def get_table_download_link():
     encoded_data = b64encode(processed_data).decode()
     download_link = f'<a href="data:application/octet-stream;base64,{encoded_data}" download="data.xlsx">Download Sample Excel file</a>'
     return download_link
+
+def llm_analysis(json):
+    st.header("AI-Powered Analysis")
+    prompt = st.text_area("Describe your Question:", 
+    placeholder="Example: How many nodes leads to OK leaf Node\n")
+
+    if st.button("Generate AI-Based Analysis"):
+        client = OpenAI(api_key="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", base_url="https://api.perplexity.ai")
+        answer = generate_analysis_from_llm(prompt, client, json)
+        if answer:
+            st.write('LLM Answer: ', answer)
+
+def generate_analysis_from_llm(prompt, client, tree_json):
+    def convert_numpy(obj):
+        if isinstance(obj, dict):
+            return {k: convert_numpy(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [convert_numpy(v) for v in obj]
+        elif hasattr(obj, 'item'):
+            return obj.item()
+        else:
+            return obj
+
+    # Clean and stringify the JSON
+    cleaned_json = convert_numpy(tree_json)
+    tree_str = json.dumps(cleaned_json, indent=2)
+
+    # Create the system prompt with JSON inside as plain text
+    system_prompt = (
+        "You are an AI specializing in analysing JSON-based decision trees. "
+        "Your task is to answer user questions based only with the provided decision tree below.\n\n"
+        "Here is the decision tree:\n" + tree_str + "You should only give the answer from the context of the provided decision tree.\n\n "
+        "DO not provide the json structure and id in the answer. Let it be a natural language and do not use the word json or id in the answer"
+    )
+
+    messages = [
+        {
+            "role": "system",
+            "content": system_prompt
+        },
+        {
+            "role": "user",
+            "content": prompt + "according to the provided decision tree"
+        }
+    ]
+
+    try:
+        response = client.chat.completions.create(
+            model="llama-3.1-sonar-large-128k-online",
+            messages=messages
+        )
+        return response.choices[0].message.content.strip()
+
+    except Exception as e:
+        st.error(f"Error generating Analysis: {e}")
+        return None
+ 
 
 
 def main():
