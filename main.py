@@ -20,6 +20,7 @@ from streamlit_flow.elements import StreamlitFlowNode, StreamlitFlowEdge
 from streamlit_flow.state import StreamlitFlowState
 from streamlit_flow.layouts import TreeLayout
 import json
+import json as json_lib 
 from openai import OpenAI
 
 st.set_page_config(layout="wide")
@@ -970,7 +971,7 @@ def decision_tree_viz(depth):
                 "edges": [edge.__dict__ for edge in st.session_state.canvas_state_dt.edges]
             }
 
-            tree_json = json.dumps(tree_data, indent=4)
+            tree_json = json_lib.dumps(tree_data, indent=4)
 
             # JSON download button
             st.download_button(
@@ -1572,7 +1573,7 @@ def probabilistic_decision_tree_viz(depth):
                 "edges": [edge.__dict__ for edge in st.session_state.canvas_state_dt.edges]
             }
 
-            tree_json = json.dumps(tree_data, indent=4)
+            tree_json = json_lib.dumps(tree_data, indent=4)
 
             # JSON download button
             st.download_button(
