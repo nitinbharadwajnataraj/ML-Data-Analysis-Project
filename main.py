@@ -883,6 +883,18 @@ def decision_tree_viz(depth):
     with tab5:
         st.header("Analyse via Image")
 
+        # Import required libraries
+        from streamlit_cropperjs import st_cropperjs
+        import base64
+        from io import BytesIO
+        import time
+        from PIL import Image
+        import numpy as np
+
+        # Initialize session state for tree screenshot
+        if 'tree_screenshot' not in st.session_state:
+            st.session_state['tree_screenshot'] = None
+
         # Image upload section
         uploaded_file = st.file_uploader(
             "Upload an Image (only .jpg, .jpeg, .png allowed)",
@@ -890,14 +902,39 @@ def decision_tree_viz(depth):
         )
 
         if uploaded_file:
-            st.image(uploaded_file, caption="Uploaded Image", use_container_width=True)
+            # Read the image and convert to a format suitable for cropperjs
+            image_bytes = uploaded_file.getvalue()
+            st.session_state['original_image'] = image_bytes
             
-            # Add image analysis functionality here
-            st.info("Image analysis will be performed here. You can add your image processing code.")
+            # Display and crop image using cropperjs
+            cropped_img = st_cropperjs(
+                img_file=uploaded_file,
+                box_color='red',
+                aspect_ratio=None,
+                return_type='bytes'
+            )
             
-            # Example placeholder for image analysis results
-            with st.expander("Image Analysis Results", expanded=False):
-                st.write("Your image analysis results will appear here.")
+            if cropped_img:
+                # Show the cropped image
+                st.image(cropped_img, caption="Processed Image", use_container_width=True)
+                
+                # Save the cropped image for download
+                st.session_state['cropped_image'] = cropped_img
+                
+                # Add download button for the cropped image
+                st.download_button(
+                    label="Download Processed Image",
+                    data=cropped_img,
+                    file_name=f"processed_image_{int(time.time())}.png",
+                    mime="image/png"
+                )
+                
+                # Add image analysis functionality here
+                st.info("Image analysis will be performed here. You can add your image processing code.")
+                
+                # Example placeholder for image analysis results
+                with st.expander("Image Analysis Results", expanded=False):
+                    st.write("Your image analysis results will appear here.")
 
         st.markdown("---")
 
@@ -921,15 +958,18 @@ def decision_tree_viz(depth):
             if 'canvas_state_dt' not in st.session_state:
                 st.session_state.canvas_state_dt = StreamlitFlowState([], [])
 
-            with st.container(): 
+            # Create a container for our tree with a unique key for capturing
+            tree_container = st.container()
+            with tree_container:
                 # Apply custom CSS to remove padding/margin
                 st.markdown("""
                     <style>
                         #flow-container {
-                            background-color: transparent;
-                            padding: 0;
+                            background-color: white;
+                            padding: 10px;
                             margin: 0;
-                            border-radius: 0;
+                            border-radius: 8px;
+                            border: 1px solid #ddd;
                         }
                         
                         .element-container {
@@ -939,6 +979,7 @@ def decision_tree_viz(depth):
                     </style>
                 """, unsafe_allow_html=True)
                 
+                # This div will be our capture target
                 st.markdown('<div id="flow-container">', unsafe_allow_html=True)
                 st.info('Right click on the canvas to add Nodes and Edges')
 
@@ -956,6 +997,36 @@ def decision_tree_viz(depth):
                     enable_node_menu=True,
                 )
 
+                # Debug section to understand node structure
+                if st.checkbox("Debug Node Structure", False):
+                    st.subheader("Node Structure Information")
+                    
+                    node_debug_list = []
+                    for node in st.session_state.canvas_state_dt.nodes:
+                        # Get node data fields
+                        data_fields = {}
+                        if hasattr(node, 'data') and isinstance(node.data, dict):
+                            data_fields = node.data
+                        
+                        # Extract what would be displayed in visualization
+                        display_label = None
+                        for field in ['label', 'text', 'content', 'name', 'title', 'value']:
+                            if field in data_fields and data_fields[field]:
+                                display_label = data_fields[field]
+                                break
+                                
+                        # Add to debug list
+                        node_debug_list.append({
+                            "Node ID": node.id,
+                            "Display Label": display_label,
+                            "Data Fields": data_fields
+                        })
+                    
+                    # Show the node information
+                    for i, node_info in enumerate(node_debug_list):
+                        with st.expander(f"Node {i+1}: {node_info['Display Label'] or node_info['Node ID']}", expanded=False):
+                            st.json(node_info)
+
                 st.markdown('</div>', unsafe_allow_html=True)
 
             # Metrics display
@@ -965,21 +1036,213 @@ def decision_tree_viz(depth):
 
             st.markdown("---")
 
+                                # Create a PNG representation of the tree (server-side)
+            if len(st.session_state.canvas_state_dt.nodes) > 0:
+                try:
+                    import matplotlib.pyplot as plt
+                    import networkx as nx
+                    import re
+                    
+                    # Function to clean node IDs
+                    def clean_node_id(node_id):
+                        # Remove common ReactFlow prefixes
+                        if isinstance(node_id, str):
+                            # Remove prefixes like "node_", "st-flow-node_" etc.
+                            clean_id = re.sub(r'^(node_|st-flow-node_)', '', node_id)
+                            # Shorten long IDs (often hash-like strings)
+                            if len(clean_id) > 12:
+                                clean_id = clean_id[:8] + "..."
+                            return clean_id
+                        return str(node_id)
+                    
+                    # Create a graph from the tree data
+                    G = nx.DiGraph()
+                    
+                    # Debug the node structure to understand what's available
+                    node_debug_info = {}
+                    
+                    # Improved node label extraction
+                    for node in st.session_state.canvas_state_dt.nodes:
+                        node_id = str(node.id)
+                        
+                        # Initialize default label as None
+                        label = None
+                        
+                        # Extract label from ReactFlow node structure
+                        if hasattr(node, 'data') and isinstance(node.data, dict):
+                            # ReactFlow typically stores the visible text content in these fields
+                            # Try all common places where ReactFlow stores node labels
+                            for field in ['label', 'text', 'content', 'name', 'title', 'value']:
+                                if field in node.data and node.data[field]:
+                                    label = node.data[field]
+                                    break
+                            
+                            # For nodes with HTML content, try to extract the text
+                            if 'html' in node.data and node.data['html']:
+                                try:
+                                    html_content = node.data['html']
+                                    # Simple text extraction from HTML (can be improved if needed)
+                                    import re
+                                    text_content = re.sub(r'<[^>]+>', '', html_content).strip()
+                                    if text_content:
+                                        label = text_content
+                                except Exception:
+                                    pass
+                            
+                            # Store all node attributes for debugging
+                            node_debug_info[node_id] = {
+                                'data': node.data,
+                                'extracted_label': label
+                            }
+                        
+                        # If still no label found, look directly at node attributes
+                        if not label and hasattr(node, 'label'):
+                            label = node.label
+                            
+                        # If still no label found, check if there's a 'text' field directly on the node
+                        if not label and hasattr(node, 'text'):
+                            label = node.text
+                            
+                        # If still no label found or it's empty, use a simplified node ID as label
+                        if not label:
+                            # Clean up the node ID for display
+                            label = clean_node_id(node_id)
+                            if not label:
+                                label = f"Node {len(G.nodes) + 1}"
+                        
+                        # Add node with its clean label as an attribute
+                        G.add_node(node_id, label=label)
+                    
+                    # Log debug info to help diagnose
+                    st.session_state['node_debug_info'] = node_debug_info
+                    
+                    # Add edges
+                    for edge in st.session_state.canvas_state_dt.edges:
+                        G.add_edge(edge.source, edge.target)
+                    
+                    # Create a figure and draw the graph
+                    plt.figure(figsize=(12, 8), facecolor='white')
+                    
+                    # Use better layout for trees
+                    # Try different layouts to see which works best
+                    if len(G.nodes) > 1:
+                        try:
+                            # For tree-like structures, hierarchical layout works best
+                            pos = nx.nx_agraph.graphviz_layout(G, prog='dot', args='-Grankdir=TB')
+                        except Exception:
+                            try:
+                                # Fall back to Sugiyama layout for directed graphs
+                                pos = nx.multipartite_layout(G, subset_key=lambda node: G.in_degree(node))
+                            except Exception:
+                                # Last resort: spring layout
+                                pos = nx.spring_layout(G, k=0.5, iterations=100)
+                    else:
+                        # With just one node, spring layout is fine
+                        pos = nx.spring_layout(G, k=0.15, iterations=20)
+                    
+                    # Draw nodes with better styling
+                    nx.draw_networkx_nodes(G, pos, 
+                                          node_color='lightblue', 
+                                          node_size=3000, 
+                                          edgecolors='black', 
+                                          alpha=0.8)
+                    
+                    # Draw edges with arrows - make them visible
+                    nx.draw_networkx_edges(G, pos, 
+                                          arrows=True,
+                                          arrowsize=20,
+                                          width=2,
+                                          edge_color='black',
+                                          alpha=0.8)
+                    
+                    # Use ONLY the extracted clean labels for node labels
+                    clean_labels = {node_id: G.nodes[node_id]['label'] for node_id in G.nodes}
+                    nx.draw_networkx_labels(G, pos, 
+                                           labels=clean_labels, 
+                                           font_size=12, 
+                                           font_family='sans-serif',
+                                           font_weight='bold')
+                    
+                    # Better save handling with background and improved resolution
+                    plt.tight_layout()
+                    plt.axis('off')  # Turn off axis
+                    
+                    # Add a title that includes the number of nodes
+                    plt.title(f"Decision Tree ({len(G.nodes)} nodes)", fontsize=16)
+                    
+                    # Save with white background and higher DPI for better quality
+                    buf = BytesIO()
+                    plt.savefig(buf, format='png', bbox_inches='tight', 
+                               dpi=150, facecolor='white')
+                    buf.seek(0)
+                    plt.close()
+                    
+                    # Save the visualization to session state
+                    st.session_state['tree_screenshot'] = buf.getvalue()
+                    
+                    # Show a preview of the download image
+                    st.subheader("Preview of Downloadable Tree Image")
+                    st.image(buf, caption="Tree Visualization", use_container_width=True)
+                except Exception as e:
+                    st.error(f"Error generating tree visualization: {str(e)}")
+
             # Export functionality
             tree_data = {
                 "nodes": [node.__dict__ for node in st.session_state.canvas_state_dt.nodes],
                 "edges": [edge.__dict__ for edge in st.session_state.canvas_state_dt.edges]
             }
 
+            # Make sure json is properly imported and not shadowed
             tree_json = json_lib.dumps(tree_data, indent=4)
-
-            # JSON download button
-            st.download_button(
+            
+            # Download buttons section
+            st.subheader("Download Options")
+            col1, col2 = st.columns(2)
+            
+            # JSON Download button
+            col1.download_button(
                 label="Download Tree Structure (JSON)",
                 data=tree_json,
                 file_name="my_tree_structure.json",
                 mime="application/json"
             )
+            
+            # Image Download button (only show if we have a tree visualization)
+            if st.session_state['tree_screenshot'] is not None:
+                col2.download_button(
+                    label="Download Tree Image",
+                    data=st.session_state['tree_screenshot'],
+                    file_name=f"tree_visualization_{int(time.time())}.png",
+                    mime="image/png"
+                )
+            
+        # Initialize hypothesis state
+        if "submitted_hypotheses" not in st.session_state:
+            st.session_state["submitted_hypotheses"] = []
+        
+        # Initialize a reset flag
+        if "reset_form_dt" not in st.session_state:
+            st.session_state["reset_form_dt"] = False
+            
+        # Initialize default values for form fields
+        if "reset_form_dt" in st.session_state and st.session_state["reset_form_dt"]:
+            form_defaults = {
+                "failure_desc": "",
+                "imp_params": [],
+                "failure_name": "",
+                "hypo_prob": "Medium",
+                "fail_imp": "Medium"
+            }
+            # Reset the flag
+            st.session_state["reset_form_dt"] = False
+        else:
+            form_defaults = {
+                "failure_desc": st.session_state.get("failure_desc_dt", ""),
+                "imp_params": st.session_state.get("imp_params_dt", []),
+                "failure_name": st.session_state.get("failure_name_dt", ""),
+                "hypo_prob": st.session_state.get("hypo_prob_dt", "Medium"),
+                "fail_imp": st.session_state.get("fail_imp_dt", "Medium")
+            }
 
         # Expert Insights Section
         st.markdown("---")
@@ -1485,6 +1748,18 @@ def probabilistic_decision_tree_viz(depth):
     with tab5:
         st.header("Analyse via Image")
 
+        # Import required libraries
+        from streamlit_cropperjs import st_cropperjs
+        import base64
+        from io import BytesIO
+        import time
+        from PIL import Image
+        import numpy as np
+
+        # Initialize session state for tree screenshot
+        if 'tree_screenshot' not in st.session_state:
+            st.session_state['tree_screenshot'] = None
+
         # Image upload section
         uploaded_file = st.file_uploader(
             "Upload an Image (only .jpg, .jpeg, .png allowed)",
@@ -1492,14 +1767,39 @@ def probabilistic_decision_tree_viz(depth):
         )
 
         if uploaded_file:
-            st.image(uploaded_file, caption="Uploaded Image", use_container_width=True)
+            # Read the image and convert to a format suitable for cropperjs
+            image_bytes = uploaded_file.getvalue()
+            st.session_state['original_image'] = image_bytes
             
-            # Add image analysis functionality here
-            st.info("Image analysis will be performed here. You can add your image processing code.")
+            # Display and crop image using cropperjs
+            cropped_img = st_cropperjs(
+                img_file=uploaded_file,
+                box_color='red',
+                aspect_ratio=None,
+                return_type='bytes'
+            )
             
-            # Example placeholder for image analysis results
-            with st.expander("Image Analysis Results", expanded=False):
-                st.write("Your image analysis results will appear here.")
+            if cropped_img:
+                # Show the cropped image
+                st.image(cropped_img, caption="Processed Image", use_container_width=True)
+                
+                # Save the cropped image for download
+                st.session_state['cropped_image'] = cropped_img
+                
+                # Add download button for the cropped image
+                st.download_button(
+                    label="Download Processed Image",
+                    data=cropped_img,
+                    file_name=f"processed_image_{int(time.time())}.png",
+                    mime="image/png"
+                )
+                
+                # Add image analysis functionality here
+                st.info("Image analysis will be performed here. You can add your image processing code.")
+                
+                # Example placeholder for image analysis results
+                with st.expander("Image Analysis Results", expanded=False):
+                    st.write("Your image analysis results will appear here.")
 
         st.markdown("---")
 
@@ -1523,15 +1823,18 @@ def probabilistic_decision_tree_viz(depth):
             if 'canvas_state_dt' not in st.session_state:
                 st.session_state.canvas_state_dt = StreamlitFlowState([], [])
 
-            with st.container(): 
+            # Create a container for our tree with a unique key for capturing
+            tree_container = st.container()
+            with tree_container:
                 # Apply custom CSS to remove padding/margin
                 st.markdown("""
                     <style>
                         #flow-container {
-                            background-color: transparent;
-                            padding: 0;
+                            background-color: white;
+                            padding: 10px;
                             margin: 0;
-                            border-radius: 0;
+                            border-radius: 8px;
+                            border: 1px solid #ddd;
                         }
                         
                         .element-container {
@@ -1541,6 +1844,7 @@ def probabilistic_decision_tree_viz(depth):
                     </style>
                 """, unsafe_allow_html=True)
                 
+                # This div will be our capture target
                 st.markdown('<div id="flow-container">', unsafe_allow_html=True)
                 st.info('Right click on the canvas to add Nodes and Edges')
 
@@ -1558,6 +1862,36 @@ def probabilistic_decision_tree_viz(depth):
                     enable_node_menu=True,
                 )
 
+                # Debug section to understand node structure
+                if st.checkbox("Debug Node Structure", False):
+                    st.subheader("Node Structure Information")
+                    
+                    node_debug_list = []
+                    for node in st.session_state.canvas_state_dt.nodes:
+                        # Get node data fields
+                        data_fields = {}
+                        if hasattr(node, 'data') and isinstance(node.data, dict):
+                            data_fields = node.data
+                        
+                        # Extract what would be displayed in visualization
+                        display_label = None
+                        for field in ['label', 'text', 'content', 'name', 'title', 'value']:
+                            if field in data_fields and data_fields[field]:
+                                display_label = data_fields[field]
+                                break
+                                
+                        # Add to debug list
+                        node_debug_list.append({
+                            "Node ID": node.id,
+                            "Display Label": display_label,
+                            "Data Fields": data_fields
+                        })
+                    
+                    # Show the node information
+                    for i, node_info in enumerate(node_debug_list):
+                        with st.expander(f"Node {i+1}: {node_info['Display Label'] or node_info['Node ID']}", expanded=False):
+                            st.json(node_info)
+
                 st.markdown('</div>', unsafe_allow_html=True)
 
             # Metrics display
@@ -1567,27 +1901,186 @@ def probabilistic_decision_tree_viz(depth):
 
             st.markdown("---")
 
+                                # Create a PNG representation of the tree (server-side)
+            if len(st.session_state.canvas_state_dt.nodes) > 0:
+                try:
+                    import matplotlib.pyplot as plt
+                    import networkx as nx
+                    import re
+                    
+                    # Function to clean node IDs
+                    def clean_node_id(node_id):
+                        # Remove common ReactFlow prefixes
+                        if isinstance(node_id, str):
+                            # Remove prefixes like "node_", "st-flow-node_" etc.
+                            clean_id = re.sub(r'^(node_|st-flow-node_)', '', node_id)
+                            # Shorten long IDs (often hash-like strings)
+                            if len(clean_id) > 12:
+                                clean_id = clean_id[:8] + "..."
+                            return clean_id
+                        return str(node_id)
+                    
+                    # Create a graph from the tree data
+                    G = nx.DiGraph()
+                    
+                    # Debug the node structure to understand what's available
+                    node_debug_info = {}
+                    
+                    # Improved node label extraction
+                    for node in st.session_state.canvas_state_dt.nodes:
+                        node_id = str(node.id)
+                        
+                        # Initialize default label as None
+                        label = None
+                        
+                        # Extract label from ReactFlow node structure
+                        if hasattr(node, 'data') and isinstance(node.data, dict):
+                            # ReactFlow typically stores the visible text content in these fields
+                            # Try all common places where ReactFlow stores node labels
+                            for field in ['label', 'text', 'content', 'name', 'title', 'value']:
+                                if field in node.data and node.data[field]:
+                                    label = node.data[field]
+                                    break
+                            
+                            # For nodes with HTML content, try to extract the text
+                            if 'html' in node.data and node.data['html']:
+                                try:
+                                    html_content = node.data['html']
+                                    # Simple text extraction from HTML (can be improved if needed)
+                                    import re
+                                    text_content = re.sub(r'<[^>]+>', '', html_content).strip()
+                                    if text_content:
+                                        label = text_content
+                                except Exception:
+                                    pass
+                            
+                            # Store all node attributes for debugging
+                            node_debug_info[node_id] = {
+                                'data': node.data,
+                                'extracted_label': label
+                            }
+                        
+                        # If still no label found, look directly at node attributes
+                        if not label and hasattr(node, 'label'):
+                            label = node.label
+                            
+                        # If still no label found, check if there's a 'text' field directly on the node
+                        if not label and hasattr(node, 'text'):
+                            label = node.text
+                            
+                        # If still no label found or it's empty, use a simplified node ID as label
+                        if not label:
+                            # Clean up the node ID for display
+                            label = clean_node_id(node_id)
+                            if not label:
+                                label = f"Node {len(G.nodes) + 1}"
+                        
+                        # Add node with its clean label as an attribute
+                        G.add_node(node_id, label=label)
+                    
+                    # Log debug info to help diagnose
+                    st.session_state['node_debug_info'] = node_debug_info
+                    
+                    # Add edges
+                    for edge in st.session_state.canvas_state_dt.edges:
+                        G.add_edge(edge.source, edge.target)
+                    
+                    # Create a figure and draw the graph
+                    plt.figure(figsize=(12, 8), facecolor='white')
+                    
+                    # Use better layout for trees
+                    # Try different layouts to see which works best
+                    if len(G.nodes) > 1:
+                        try:
+                            # For tree-like structures, hierarchical layout works best
+                            pos = nx.nx_agraph.graphviz_layout(G, prog='dot', args='-Grankdir=TB')
+                        except Exception:
+                            try:
+                                # Fall back to Sugiyama layout for directed graphs
+                                pos = nx.multipartite_layout(G, subset_key=lambda node: G.in_degree(node))
+                            except Exception:
+                                # Last resort: spring layout
+                                pos = nx.spring_layout(G, k=0.5, iterations=100)
+                    else:
+                        # With just one node, spring layout is fine
+                        pos = nx.spring_layout(G, k=0.15, iterations=20)
+                    
+                    # Draw nodes with better styling
+                    nx.draw_networkx_nodes(G, pos, 
+                                          node_color='lightblue', 
+                                          node_size=3000, 
+                                          edgecolors='black', 
+                                          alpha=0.8)
+                    
+                    # Draw edges with arrows - make them visible
+                    nx.draw_networkx_edges(G, pos, 
+                                          arrows=True,
+                                          arrowsize=20,
+                                          width=2,
+                                          edge_color='black',
+                                          alpha=0.8)
+                    
+                    # Use ONLY the extracted clean labels for node labels
+                    clean_labels = {node_id: G.nodes[node_id]['label'] for node_id in G.nodes}
+                    nx.draw_networkx_labels(G, pos, 
+                                           labels=clean_labels, 
+                                           font_size=12, 
+                                           font_family='sans-serif',
+                                           font_weight='bold')
+                    
+                    # Better save handling with background and improved resolution
+                    plt.tight_layout()
+                    plt.axis('off')  # Turn off axis
+                    
+                    # Add a title that includes the number of nodes
+                    plt.title(f"Decision Tree ({len(G.nodes)} nodes)", fontsize=16)
+                    
+                    # Save with white background and higher DPI for better quality
+                    buf = BytesIO()
+                    plt.savefig(buf, format='png', bbox_inches='tight', 
+                               dpi=150, facecolor='white')
+                    buf.seek(0)
+                    plt.close()
+                    
+                    # Save the visualization to session state
+                    st.session_state['tree_screenshot'] = buf.getvalue()
+                    
+                    # Show a preview of the download image
+                    st.subheader("Preview of Downloadable Tree Image")
+                    st.image(buf, caption="Tree Visualization", use_container_width=True)
+                except Exception as e:
+                    st.error(f"Error generating tree visualization: {str(e)}")
+
             # Export functionality
             tree_data = {
                 "nodes": [node.__dict__ for node in st.session_state.canvas_state_dt.nodes],
                 "edges": [edge.__dict__ for edge in st.session_state.canvas_state_dt.edges]
             }
 
+            # Make sure json is properly imported and not shadowed
             tree_json = json_lib.dumps(tree_data, indent=4)
-
-            # JSON download button
-            st.download_button(
+            
+            # Download buttons section
+            st.subheader("Download Options")
+            col1, col2 = st.columns(2)
+            
+            # JSON Download button
+            col1.download_button(
                 label="Download Tree Structure (JSON)",
                 data=tree_json,
                 file_name="my_tree_structure.json",
                 mime="application/json"
             )
-
-        # Expert Insights Section
-        st.markdown("---")
-        st.markdown("### 💬 Expert Insights")
-        st.markdown('<div id="hypothesis-form-anchor"></div>', unsafe_allow_html=True)
-
+            
+            # Image Download button (only show if we have a tree visualization)
+            if st.session_state['tree_screenshot'] is not None:
+                col2.download_button(
+                    label="Download Tree Image",
+                    data=st.session_state['tree_screenshot'],
+                    file_name=f"tree_visualization_{int(time.time())}.png",
+                    mime="image/png"
+                )
+            
         # Initialize hypothesis state
         if "submitted_hypotheses" not in st.session_state:
             st.session_state["submitted_hypotheses"] = []
@@ -1615,7 +2108,6 @@ def probabilistic_decision_tree_viz(depth):
                 "hypo_prob": st.session_state.get("hypo_prob_dt", "Medium"),
                 "fail_imp": st.session_state.get("fail_imp_dt", "Medium")
             }
-
         # Domain Hypothesis Form
         with st.container():
             with st.expander("💬 Domain Hypothesis", expanded=False):
