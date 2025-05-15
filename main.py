@@ -1804,21 +1804,21 @@ def probabilistic_decision_tree_viz(depth):
         st.markdown("---")
 
         # Tree Canvas Management
-        if 'show_tree_canvas_dt' not in st.session_state:
-            st.session_state['show_tree_canvas_dt'] = False
+        if 'show_tree_canvas_pdt' not in st.session_state:
+            st.session_state['show_tree_canvas_pdt'] = False
 
         # Toggle button for tree canvas
-        if not st.session_state['show_tree_canvas_dt']:
+        if not st.session_state['show_tree_canvas_pdt']:
             if st.button("Create your own Tree"):
-                st.session_state['show_tree_canvas_dt'] = True
+                st.session_state['show_tree_canvas_pdt'] = True
                 st.rerun()
         else:
             if st.button("Close Tree"):
-                st.session_state['show_tree_canvas_dt'] = False
+                st.session_state['show_tree_canvas_pdt'] = False
                 st.rerun()
 
         # Tree Canvas Section
-        if st.session_state['show_tree_canvas_dt']:
+        if st.session_state['show_tree_canvas_pdt']:
             # Initialize canvas state if not present
             if 'canvas_state_dt' not in st.session_state:
                 st.session_state.canvas_state_dt = StreamlitFlowState([], [])
