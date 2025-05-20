@@ -15,7 +15,7 @@ from Decision_Tress import Decision_Tress
 from Probabilistic_DT import Probabilistic_Decision_Tree
 import joblib
 import streamlit_flow
-#from streamlit_flow import streamlit_flow
+from streamlit_flow import streamlit_flow
 from streamlit_flow.elements import StreamlitFlowNode, StreamlitFlowEdge
 from streamlit_flow.state import StreamlitFlowState
 from streamlit_flow.layouts import TreeLayout
