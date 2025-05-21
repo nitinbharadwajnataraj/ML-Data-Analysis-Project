@@ -13,6 +13,7 @@ from Compute_fit import compute_fit, count_yes_no
 from clustering.k_means import perform_kmeans
 from Decision_Tress import Decision_Tress
 from Probabilistic_DT import Probabilistic_Decision_Tree
+from Iris_PDT import Probabilistic_Decision_Tree_Iris, df_fitting_and_evaluation_iris
 import joblib
 import streamlit_flow
 from streamlit_flow import streamlit_flow
@@ -877,7 +878,7 @@ def decision_tree_viz(depth):
             return tree_json    
         preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Decision_Tress(depth)
         json = visualize_decision_tree(dtc, feature_names)
-        llm_analysis(json)
+        llm_analysis(json,"dt")
 
 
     with tab5:
@@ -1743,7 +1744,7 @@ def probabilistic_decision_tree_viz(depth):
         
         preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree(depth)
         json = visualize_probabilistic_decision_tree(dtc, feature_names)
-        llm_analysis(json)
+        llm_analysis(json,"pdt")
         
     with tab5:
         st.header("Analyse via Image")
@@ -2257,16 +2258,21 @@ def get_table_download_link():
     download_link = f'<a href="data:application/octet-stream;base64,{encoded_data}" download="data.xlsx">Download Sample Excel file</a>'
     return download_link
 
-def llm_analysis(json):
+def llm_analysis(json,sess_state):
+    if f"llm_answer_{sess_state}" not in st.session_state:
+        st.session_state[f"llm_answer_{sess_state}"] = None
     st.header("AI-Powered Analysis")
     prompt = st.text_area("Describe your Question:", 
-    placeholder="Example: How many nodes leads to OK leaf Node\n")
+    placeholder="Example: How many nodes leads to OK leaf Node\n", key=f"prompt_input_{sess_state}")
 
     if st.button("Generate AI-Based Analysis"):
         client = OpenAI(api_key="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", base_url="https://api.perplexity.ai")
         answer = generate_analysis_from_llm(prompt, client, json)
         if answer:
-            st.write('LLM Answer: ', answer)
+            st.session_state[f"llm_answer_{sess_state}"] = answer
+    if st.session_state[f"llm_answer_{sess_state}"]:
+        st.markdown("### LLM Answer:")
+        st.write(st.session_state[f"llm_answer_{sess_state}"])
 
 def generate_analysis_from_llm(prompt, client, tree_json):
     def convert_numpy(obj):
@@ -2318,7 +2324,7 @@ def generate_analysis_from_llm(prompt, client, tree_json):
 def main():
     st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
 
-    sections = {'Data Understanding': 'Data Understanding', 'K-Means': 'k-means', 'Decision Tree': 'Decision Tree', 'Probabilistic Decision Tree': 'Probabilistic Decision Tree'}
+    sections = {'Data Understanding': 'Data Understanding', 'K-Means': 'k-means', 'Decision Tree': 'Decision Tree', 'Probabilistic Decision Tree': 'Probabilistic Decision Tree', 'Iris PDT': 'Iris PDT'}
 
     # Define the options for the navigation menu
     options = list(sections.keys())
@@ -2370,6 +2376,15 @@ def main():
         st.dataframe(df1,hide_index=True,width=1250)
         depth = st.slider("Select the Depth of the Probabilistic Tree", min_value=1, max_value=6, value=4, step=1)
         probabilistic_decision_tree_viz(depth)
+    
+    elif selected_section == 'Iris PDT':
+        st.header("Predictions for Synthetic Dataset")
+        df1 = df_fitting_and_evaluation_iris()
+        st.dataframe(df1,hide_index=True,width=1250)
+        depth = st.slider("Select the Depth of the Probabilistic Tree for Iris dataset", min_value=1, max_value=6, value=4, step=1)
+        #probabilistic_decision_tree_viz(depth)
+        from iris_viz import iris_probabilistic_decision_tree_viz
+        iris_probabilistic_decision_tree_viz(depth)
 
 if __name__ == "__main__":
     main()
