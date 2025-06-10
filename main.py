@@ -14,6 +14,7 @@ from clustering.k_means import perform_kmeans
 from Decision_Tress import Decision_Tress
 from Probabilistic_DT import Probabilistic_Decision_Tree
 from Iris_PDT import Probabilistic_Decision_Tree_Iris, df_fitting_and_evaluation_iris
+from steel_faults_PDT import Probabilistic_Decision_Tree_Steel_Faults, df_fitting_and_evaluation_steel_faults
 import joblib
 import streamlit_flow
 from streamlit_flow import streamlit_flow
@@ -2324,7 +2325,7 @@ def generate_analysis_from_llm(prompt, client, tree_json):
 def main():
     st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
 
-    sections = {'Data Understanding': 'Data Understanding', 'K-Means': 'k-means', 'Decision Tree': 'Decision Tree', 'Probabilistic Decision Tree': 'Probabilistic Decision Tree', 'Iris PDT': 'Iris PDT'}
+    sections = {'Data Understanding': 'Data Understanding', 'K-Means': 'k-means', 'Decision Tree': 'Decision Tree', 'Probabilistic Decision Tree': 'Probabilistic Decision Tree', 'Iris PDT': 'Iris PDT', 'Steel Faults PDT': 'Steel Faults PDT'}
 
     # Define the options for the navigation menu
     options = list(sections.keys())
@@ -2385,6 +2386,16 @@ def main():
         #probabilistic_decision_tree_viz(depth)
         from iris_viz import iris_probabilistic_decision_tree_viz
         iris_probabilistic_decision_tree_viz(depth)
+
+    elif selected_section == 'Steel Faults PDT':
+        st.header("Predictions for Synthetic Dataset")
+        df1 = df_fitting_and_evaluation_steel_faults()
+        st.dataframe(df1,hide_index=True,width=1250)
+        depth = st.slider("Select the Depth of the Probabilistic Tree for steel faults dataset", min_value=1, max_value=30, value=20, step=1)
+        #probabilistic_decision_tree_viz(depth)
+        from steel_faults_viz import steel_faults_probabilistic_decision_tree_viz
+        steel_faults_probabilistic_decision_tree_viz(depth)
+    
 
 if __name__ == "__main__":
     main()
