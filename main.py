@@ -2267,7 +2267,7 @@ def llm_analysis(json,sess_state):
     placeholder="Example: How many nodes leads to OK leaf Node\n", key=f"prompt_input_{sess_state}")
 
     if st.button("Generate AI-Based Analysis"):
-        client = OpenAI(api_key="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", base_url="https://api.perplexity.ai")
+        client = OpenAI(api_key= st.secrets["api_keys"]["perplexity"], base_url="https://api.perplexity.ai")
         answer = generate_analysis_from_llm(prompt, client, json)
         if answer:
             st.session_state[f"llm_answer_{sess_state}"] = answer
