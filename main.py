@@ -15,6 +15,7 @@ from Decision_Tress import Decision_Tress
 from Probabilistic_DT import Probabilistic_Decision_Tree
 from Iris_PDT import Probabilistic_Decision_Tree_Iris, df_fitting_and_evaluation_iris
 from steel_faults_PDT import Probabilistic_Decision_Tree_Steel_Faults, df_fitting_and_evaluation_steel_faults
+from vw_sample_data_PDT import Probabilistic_Decision_Tree_VW_Sample, df_fitting_and_evaluation_vw_sample
 import joblib
 import streamlit_flow
 from streamlit_flow import streamlit_flow
@@ -2323,9 +2324,7 @@ def generate_analysis_from_llm(prompt, client, tree_json):
 
 
 def main():
-    st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
-
-    sections = {'Data Understanding': 'Data Understanding', 'K-Means': 'k-means', 'Decision Tree': 'Decision Tree', 'Probabilistic Decision Tree': 'Probabilistic Decision Tree', 'Iris PDT': 'Iris PDT', 'Steel Faults PDT': 'Steel Faults PDT'}
+    sections = {'Data Understanding': 'Data Understanding', 'K-Means': 'k-means', 'Decision Tree': 'Decision Tree', 'Probabilistic Decision Tree': 'Probabilistic Decision Tree', 'Iris PDT': 'Iris PDT', 'Steel Faults PDT': 'Steel Faults PDT','VW Sample PDT': 'VW Sample PDT'}
 
     # Define the options for the navigation menu
     options = list(sections.keys())
@@ -2343,6 +2342,7 @@ def main():
         df_bar_chart_fitting_group()
 
     elif selected_section == 'Data Understanding':
+        st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
         st.header('Synthetic Dataset')
         main_df, df1 = df_fitting_and_evaluation()
         main_df.drop(columns=['fitting_distance','Prediction', 'Evaluation','fitting_group'], inplace=True)
@@ -2359,12 +2359,14 @@ def main():
             scatter_plot()
 
     elif selected_section == 'k-means':
+        st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
         kmeans_info_popover()
         fitting_group_visualisation()
         #fitting_group_visualisation_dbscan()
         kmeans()
 
     elif selected_section == 'Decision Tree':
+        st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
         st.header("Predictions for Synthetic Dataset")
         main_df, df1 = df_fitting_and_evaluation()
         st.dataframe(df1,hide_index=True,width=1250)
@@ -2372,6 +2374,7 @@ def main():
         decision_tree_viz(depth)
     
     elif selected_section == 'Probabilistic Decision Tree':
+        st.markdown('<h1 style="text-align: center;">Box and Cylinder Analysis</h1>', unsafe_allow_html=True)
         st.header("Predictions for Synthetic Dataset")
         main_df, df1 = df_fitting_and_evaluation_PDT()
         st.dataframe(df1,hide_index=True,width=1250)
@@ -2379,7 +2382,8 @@ def main():
         probabilistic_decision_tree_viz(depth)
     
     elif selected_section == 'Iris PDT':
-        st.header("Predictions for Synthetic Dataset")
+        st.markdown('<h1 style="text-align: center;">IRIS Dataset Analysis</h1>', unsafe_allow_html=True)
+        st.header("Iris Dataset")
         df1 = df_fitting_and_evaluation_iris()
         st.dataframe(df1,hide_index=True,width=1250)
         depth = st.slider("Select the Depth of the Probabilistic Tree for Iris dataset", min_value=1, max_value=6, value=4, step=1)
@@ -2388,13 +2392,26 @@ def main():
         iris_probabilistic_decision_tree_viz(depth)
 
     elif selected_section == 'Steel Faults PDT':
-        st.header("Predictions for Synthetic Dataset")
+        st.markdown('<h1 style="text-align: center;">Steel Faults Dataset Analysis</h1>', unsafe_allow_html=True)
+        st.header("Steel Faults Dataset")
         df1 = df_fitting_and_evaluation_steel_faults()
         st.dataframe(df1,hide_index=True,width=1250)
         depth = st.slider("Select the Depth of the Probabilistic Tree for steel faults dataset", min_value=1, max_value=30, value=20, step=1)
         #probabilistic_decision_tree_viz(depth)
         from steel_faults_viz import steel_faults_probabilistic_decision_tree_viz
         steel_faults_probabilistic_decision_tree_viz(depth)
+    
+    elif selected_section == 'VW Sample PDT':
+        st.markdown('<h1 style="text-align: center;">Volkwagen Dataset Analysis</h1>', unsafe_allow_html=True)
+        st.header("Volkwagen Dataset")
+        df1 = df_fitting_and_evaluation_vw_sample()
+        st.dataframe(df1,hide_index=True,width=1250)
+        depth = st.slider("Select the Depth of the Probabilistic Tree for VW Sample dataset", min_value=1, max_value=10, value=5, step=1)
+        drop_Abstand_Pins_vertikal = st.selectbox("Drop Abstand_Pins_vertikal? ",["Yes", "No"])
+        st.write(f"You selected: {drop_Abstand_Pins_vertikal}")
+        #probabilistic_decision_tree_viz(depth)
+        from vw_sample_data_viz import vw_sample_probabilistic_decision_tree_viz
+        vw_sample_probabilistic_decision_tree_viz(depth,drop_Abstand_Pins_vertikal)
     
 
 if __name__ == "__main__":
