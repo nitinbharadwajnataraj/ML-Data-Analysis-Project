@@ -63,6 +63,7 @@ def Probabilistic_Decision_Tree_VW_Sample(depth,selected_to_drop):
     dtc = DecisionTreeClassifier(
     criterion='entropy',
     random_state=0,
+    class_weight="balanced",
     max_depth=depth
 )
     dtc.fit(x_main, y_main)
