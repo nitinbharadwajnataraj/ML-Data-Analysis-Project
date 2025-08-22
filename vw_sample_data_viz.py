@@ -23,6 +23,7 @@ from streamlit_flow.layouts import TreeLayout
 import json
 import json as json_lib 
 from openai import OpenAI
+import hashlib
 
 def rename_dataframe_columns(df):
     # Rename the columns to match the expected feature names
@@ -129,8 +130,8 @@ def generate_analysis_from_llm(prompt, client, tree_json):
         st.error(f"Error generating Analysis: {e}")
         return None
 
-def vw_sample_probabilistic_decision_tree_viz(depth,drop_Abstand_Pins_vertikal):
-    preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree_VW_Sample(depth,drop_Abstand_Pins_vertikal)
+def vw_sample_probabilistic_decision_tree_viz(depth,selected_to_drop):
+    preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree_VW_Sample(depth,selected_to_drop)
     tab0, tab1, tab2, tab4, tab5 = st.tabs(
         ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "VW Sample PDT Visualization", "Analysis"])
     preci_value = round(preci_value, 4)
@@ -176,15 +177,15 @@ def vw_sample_probabilistic_decision_tree_viz(depth,drop_Abstand_Pins_vertikal):
                     unnecessary_cols = ['pin_position','stator_id','ProduktID', 'Pinbezeichnung','left_pin_id', 'right_pin_id','Drahtprüfung_Ergebnis_x', 'Pin_ID_x','Dachbiegen_Ergebnis_x', 'Pin_Type_x', '3D_Biegen_Ergebnis_x',
                                         'Abisolieren_eval_x', 'Drahtprüfung_Ergebnis_y', 'Pin_ID_y','Dachbiegen_Ergebnis_y', 'Pin_Type_y', '3D_Biegen_Ergebnis_y','Ergebnis']
                     df_input_val = df_input_val.drop(columns=[col for col in unnecessary_cols if col in df_input_val.columns], errors='ignore')
-                    if drop_Abstand_Pins_vertikal == 'Yes':
-                        df_input_val = df_input_val.drop(columns=['Abstand_Pins_vertikal'])
+                    if selected_to_drop:
+                        df_input_val = df_input_val.drop(columns=selected_to_drop)
                 elif file_ext.lower() == 'csv':
                     df_input_val = pd.read_csv(uploaded_file, sep=';',decimal=',',on_bad_lines='skip')
                     unnecessary_cols = ['pin_position','stator_id','ProduktID', 'Pinbezeichnung','left_pin_id', 'right_pin_id','Drahtprüfung_Ergebnis_x', 'Pin_ID_x','Dachbiegen_Ergebnis_x', 'Pin_Type_x', '3D_Biegen_Ergebnis_x',
                                         'Abisolieren_eval_x', 'Drahtprüfung_Ergebnis_y', 'Pin_ID_y','Dachbiegen_Ergebnis_y', 'Pin_Type_y', '3D_Biegen_Ergebnis_y','Ergebnis']
                     df_input_val = df_input_val.drop(columns=[col for col in unnecessary_cols if col in df_input_val.columns], errors='ignore')
-                    if drop_Abstand_Pins_vertikal == 'Yes':
-                        df_input_val = df_input_val.drop(columns=['Abstand_Pins_vertikal'])
+                    if selected_to_drop:
+                        df_input_val = df_input_val.drop(columns=selected_to_drop)
                 else:
                     st.error("Unsupported file format. Please upload an Excel (xlsx/xls) or CSV (csv) file.")
                     return
@@ -374,7 +375,19 @@ def vw_sample_probabilistic_decision_tree_viz(depth,drop_Abstand_Pins_vertikal):
         #df_bar_chart_fitting_group_PDT()
 
     with tab4:
+        import numpy as np
+        def _tree_signature(dtc, feature_names):
+            t = dtc.tree_
+            # hash structure that changes whenever the trained tree changes
+            sig_arr = np.concatenate([
+                t.feature.astype(np.int64),
+                np.round(t.threshold, 6).view(np.float64)  # stable up to 1e-6
+            ])
+            h = hashlib.md5(sig_arr.tobytes()).hexdigest()
+            return (h, tuple(feature_names))
+        
         def visualize_vw_sample_probabilistic_decision_tree(dtc, feature_names):
+            #st.write("feature names:" , feature_names)
             nodes = []
             edges = []
 
@@ -477,28 +490,42 @@ def vw_sample_probabilistic_decision_tree_viz(depth,drop_Abstand_Pins_vertikal):
                         ))
                         edge_label_map[edge_id] = "False"
 
-            traverse(0)
-
+            #traverse(0)
+            
+            tree_sig = (tuple(feature_names), int(dtc.tree_.node_count))
             st.markdown("### 🌳 Decision Tree Visualization")
 
-            if (
-                "tree_flow_state_prob_dt_vw_sample" not in st.session_state or
-                st.session_state.get("last_filter_prob_dt_vw_sample") != path_filter or
-                st.session_state.get("last_depth_prob_dt_vw_sample") != dtc.get_depth()
-            ):
-                st.session_state.tree_flow_state_prob_dt_vw_sample = StreamlitFlowState(nodes, edges)
-                st.session_state.last_filter_prob_dt_vw_sample = path_filter
-                st.session_state.last_depth_prob_dt_vw_sample = dtc.get_depth()
+            prev_sig    = st.session_state.get("vw_last_tree_sig")
+            prev_filter = st.session_state.get("vw_last_filter")
+
+            needs_rebuild = (
+                "vw_tree_state" not in st.session_state
+                or prev_sig != tree_sig
+                or prev_filter != path_filter
+            )
+
+            if needs_rebuild:
+                traverse(0)
+                st.session_state.vw_tree_state  = StreamlitFlowState(nodes, edges)
+                st.session_state.vw_node_map = node_content_map
+                st.session_state.vw_edge_map = edge_label_map
+                st.session_state.vw_last_tree_sig = tree_sig
+                st.session_state.vw_last_filter   = path_filter
+            
+            # change the component key when the tree changes to force full refresh
+            #key_suffix = st.session_state.last_tree_sig_prob_dt_vw_sample[0][:8]  # first 8 chars of hash
+            flow_key = f"decision_tree_flow_{hash(st.session_state.vw_last_tree_sig)}"
 
             updated_state = streamlit_flow(
-                'decision_tree_flow',
-                st.session_state.tree_flow_state_prob_dt_vw_sample,
+                flow_key,
+                st.session_state.vw_tree_state,
                 fit_view=True,
                 get_node_on_click=True,
                 get_edge_on_click=True
             )
-
-            selected_id = updated_state.selected_id
+            node_content_map = st.session_state.get("vw_node_map", {})
+            edge_label_map   = st.session_state.get("vw_edge_map", {})
+            selected_id = getattr(updated_state, "selected_id", None)
             if selected_id in node_content_map:
                 st.success(f"Clicked Node Content: {node_content_map[selected_id]}")
             elif selected_id in edge_label_map:
@@ -539,7 +566,7 @@ def vw_sample_probabilistic_decision_tree_viz(depth,drop_Abstand_Pins_vertikal):
             tree_json = extract_tree_json(0)
             return tree_json
         
-        preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree_VW_Sample(depth,drop_Abstand_Pins_vertikal)
+        preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree_VW_Sample(depth,selected_to_drop)
         json = visualize_vw_sample_probabilistic_decision_tree(dtc, feature_names)
         llm_analysis(json, "vw_sample")
         

@@ -47,10 +47,10 @@ def prepare_DT_df_vw_sample():
     return df
 
 
-def Probabilistic_Decision_Tree_VW_Sample(depth,drop_Abstand_Pins_vertikal):
+def Probabilistic_Decision_Tree_VW_Sample(depth,selected_to_drop):
     df = prepare_DT_df_vw_sample()
-    if drop_Abstand_Pins_vertikal == 'Yes':
-        df = df.drop(columns=['Abstand_Pins_vertikal'])
+    if selected_to_drop:
+        df = df.drop(columns=selected_to_drop)
     #print(df.head())
     X = df.drop(columns=['Ergebnis_encoded'])
     y = df['Ergebnis_encoded']
@@ -62,6 +62,7 @@ def Probabilistic_Decision_Tree_VW_Sample(depth,drop_Abstand_Pins_vertikal):
     # Create a Decision Tree with probabilistic behavior
     dtc = DecisionTreeClassifier(
     criterion='entropy',
+    random_state=0,
     max_depth=depth
 )
     dtc.fit(x_main, y_main)

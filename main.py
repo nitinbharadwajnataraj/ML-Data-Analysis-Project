@@ -2324,7 +2324,7 @@ def generate_analysis_from_llm(prompt, client, tree_json):
 
 
 def main():
-    sections = {'Data Understanding': 'Data Understanding', 'K-Means': 'k-means', 'Decision Tree': 'Decision Tree', 'Probabilistic Decision Tree': 'Probabilistic Decision Tree', 'Iris PDT': 'Iris PDT', 'Steel Faults PDT': 'Steel Faults PDT','VW Sample PDT': 'VW Sample PDT'}
+    sections = {'Data Understanding': 'Data Understanding', 'K-Means': 'k-means', 'Decision Tree': 'Decision Tree', 'Probabilistic Decision Tree': 'Probabilistic Decision Tree', 'Iris PDT': 'Iris PDT', 'Steel Faults PDT': 'Steel Faults PDT','Volkswagen PDT': 'Volkswagen PDT'}
 
     # Define the options for the navigation menu
     options = list(sections.keys())
@@ -2401,17 +2401,55 @@ def main():
         from steel_faults_viz import steel_faults_probabilistic_decision_tree_viz
         steel_faults_probabilistic_decision_tree_viz(depth)
     
-    elif selected_section == 'VW Sample PDT':
-        st.markdown('<h1 style="text-align: center;">Volkwagen Dataset Analysis</h1>', unsafe_allow_html=True)
-        st.header("Volkwagen Dataset")
+    elif selected_section == 'Volkswagen PDT':
+        df_actual = pd.read_csv("Analysis_Data_augmented_csv.csv", sep=';',decimal=',',on_bad_lines='skip')
+        df_actual = df_actual.drop(columns=['pin_position','stator_id','ProduktID', 'Pinbezeichnung','left_pin_id', 'right_pin_id','Drahtprüfung_Ergebnis_x', 'Pin_ID_x','Dachbiegen_Ergebnis_x', 'Pin_Type_x', '3D_Biegen_Ergebnis_x',
+       'Abisolieren_eval_x', 'Drahtprüfung_Ergebnis_y', 'Pin_ID_y',
+       'Dachbiegen_Ergebnis_y', 'Pin_Type_y', '3D_Biegen_Ergebnis_y', 'Ergebnis'])
+        st.markdown('<h1 style="text-align: center;">Volkswagen Dataset Analysis</h1>', unsafe_allow_html=True)
+        st.header("Volkswagen Dataset")
         df1 = df_fitting_and_evaluation_vw_sample()
         st.dataframe(df1,hide_index=True,width=1250)
         depth = st.slider("Select the Depth of the Probabilistic Tree for VW Sample dataset", min_value=1, max_value=10, value=5, step=1)
-        drop_Abstand_Pins_vertikal = st.selectbox("Drop Abstand_Pins_vertikal? ",["Yes", "No"])
-        st.write(f"You selected: {drop_Abstand_Pins_vertikal}")
+
+        if "vw_applied_drop" not in st.session_state:
+            st.session_state.vw_applied_drop = []  # nothing dropped initially
+        if "vw_drop" not in st.session_state:
+            st.session_state.vw_drop = []
+
+        options = df_actual.columns.tolist()
+        selected_to_drop = st.multiselect("Choose the features to be dropped (Optional)", options, default=st.session_state.vw_drop,key="vw_drop")
+
+        pending_drop = st.session_state.vw_drop        # current UI selection
+        applied_drop = st.session_state.vw_applied_drop
+        show_body = False
+        if pending_drop == applied_drop:
+            # no change pending -> show body
+            show_body = True
+        else:
+            if len(pending_drop) == 0:
+                # user cleared selection -> auto-reset to default and show body
+                st.session_state.vw_applied_drop = []
+                applied_drop = []
+                show_body = True
+            else:
+                st.write("You have selected following features to be dropped:")
+                df = pd.DataFrame(pending_drop, columns=["Features Dropped"])
+                st.dataframe(df, width=200, hide_index=True)
+                # changed to a non-empty selection -> require Update
+                if st.button("Update"):
+                    st.session_state.vw_applied_drop = pending_drop
+                    applied_drop = pending_drop
+                    show_body = True
+        # render body only when allowed
+        if show_body:
+            from vw_sample_data_viz import vw_sample_probabilistic_decision_tree_viz
+            vw_sample_probabilistic_decision_tree_viz(depth, applied_drop)
+
+        #drop_Abstand_Pins_vertikal = st.selectbox("Drop Abstand_Pins_vertikal? ",["Yes", "No"])
         #probabilistic_decision_tree_viz(depth)
-        from vw_sample_data_viz import vw_sample_probabilistic_decision_tree_viz
-        vw_sample_probabilistic_decision_tree_viz(depth,drop_Abstand_Pins_vertikal)
+        #from vw_sample_data_viz import vw_sample_probabilistic_decision_tree_viz
+        #vw_sample_probabilistic_decision_tree_viz(depth,applied_drop)
     
 
 if __name__ == "__main__":
