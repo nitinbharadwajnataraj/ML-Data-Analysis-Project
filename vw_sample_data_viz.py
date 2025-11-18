@@ -121,9 +121,10 @@ def generate_analysis_from_llm(prompt, client, tree_json):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4o",
+            model="wisdom-ai-dsv3",
             messages=messages
         )
+        print("LLM response:\n",response)
         return response.choices[0].message.content.strip()
 
     except Exception as e:
