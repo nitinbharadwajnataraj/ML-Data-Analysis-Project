@@ -2415,7 +2415,7 @@ def main():
         if "vw_applied_drop" not in st.session_state:
             st.session_state.vw_applied_drop = []  # nothing dropped initially
         if "vw_drop" not in st.session_state:
-            st.session_state.vw_drop = []
+            st.session_state.vw_drop = ['Abstand_Pins_vertikal']  # default drop features
 
         options = df_actual.columns.tolist()
         selected_to_drop = st.multiselect("Choose the features to be dropped (Optional)", options, default=st.session_state.vw_drop,key="vw_drop")
