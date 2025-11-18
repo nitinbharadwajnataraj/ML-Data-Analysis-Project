@@ -2413,7 +2413,7 @@ def main():
         depth = st.slider("Select the Depth of the Probabilistic Tree for VW Sample dataset", min_value=1, max_value=10, value=5, step=1)
 
         if "vw_applied_drop" not in st.session_state:
-            st.session_state.vw_applied_drop = []  # nothing dropped initially
+            st.session_state.vw_applied_drop = ['Abstand_Pins_vertikal']  # nothing dropped initially
         if "vw_drop" not in st.session_state:
             st.session_state.vw_drop = ['Abstand_Pins_vertikal']  # default drop features
 
