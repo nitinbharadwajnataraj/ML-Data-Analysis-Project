@@ -76,7 +76,7 @@ def llm_analysis(json,sess_state):
     placeholder="Example: How many path leads to NIO leaf Node\n", key=f"prompt_input_{sess_state}")
 
     if st.button("Generate AI-Based Analysis"):
-        client = OpenAI(api_key=st.secrets["api_keys"]["wisdom_gate"], base_url="https://wisdom-gate.juheapi.com")
+        client = OpenAI(api_key=st.secrets["api_keys"]["wisdom_gate"], base_url="https://wisdom-gate.juheapi.com/v1")
         answer = generate_analysis_from_llm(prompt, client, json)
         if answer:
             st.session_state[f"llm_answer_{sess_state}"] = answer
@@ -124,7 +124,6 @@ def generate_analysis_from_llm(prompt, client, tree_json):
             model="wisdom-ai-dsv3",
             messages=messages
         )
-        print("LLM response:\n",response)
         return response.choices[0].message.content.strip()
 
     except Exception as e:
