@@ -76,7 +76,7 @@ def llm_analysis(json,sess_state):
     placeholder="Example: How many path leads to NIO leaf Node\n", key=f"prompt_input_{sess_state}")
 
     if st.button("Generate AI-Based Analysis"):
-        client = OpenAI(api_key=st.secrets["api_keys"]["perplexity"], base_url="https://api.perplexity.ai")
+        client = OpenAI(api_key=st.secrets["api_keys"]["wisdom_gate"], base_url="https://wisdom-gate.juheapi.com")
         answer = generate_analysis_from_llm(prompt, client, json)
         if answer:
             st.session_state[f"llm_answer_{sess_state}"] = answer
@@ -121,7 +121,7 @@ def generate_analysis_from_llm(prompt, client, tree_json):
 
     try:
         response = client.chat.completions.create(
-            model="llama-3.1-sonar-large-128k-online",
+            model="gpt-4o",
             messages=messages
         )
         return response.choices[0].message.content.strip()
