@@ -574,7 +574,7 @@ def vw_sample_probabilistic_decision_tree_viz(depth,selected_to_drop):
         st.header("Analyse via Image")
 
         # Import required libraries
-        from streamlit_cropperjs import st_cropperjs
+        from streamlit_cropper import st_cropper
         import base64
         from io import BytesIO
         import time
@@ -595,26 +595,32 @@ def vw_sample_probabilistic_decision_tree_viz(depth,selected_to_drop):
             # Read the image and convert to a format suitable for cropperjs
             image_bytes = uploaded_file.getvalue()
             st.session_state['original_image_vw_sample'] = image_bytes
+
+            # Convert to PIL for CropperJS
+            uploaded_pil = Image.open(uploaded_file)
             
             # Display and crop image using cropperjs
-            cropped_img = st_cropperjs(
-                img_file=uploaded_file,
+            cropped_img = st_cropper(
+                uploaded_pil,
                 box_color='red',
-                aspect_ratio=None,
-                return_type='bytes'
+                aspect_ratio=None
             )
             
             if cropped_img:
+                buf = BytesIO()
+                cropped_img.save(buf, format="PNG")
+                buf.seek(0)
                 # Show the cropped image
                 st.image(cropped_img, caption="Processed Image", use_container_width=True)
                 
                 # Save the cropped image for download
-                st.session_state['cropped_image_vw_sample'] = cropped_img
+                st.session_state['cropped_image_vw_sample'] = buf
+                
                 
                 # Add download button for the cropped image
                 st.download_button(
                     label="Download Processed Image",
-                    data=cropped_img,
+                    data=buf,
                     file_name=f"processed_image_{int(time.time())}.png",
                     mime="image/png"
                 )
