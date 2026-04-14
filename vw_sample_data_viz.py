@@ -1030,7 +1030,7 @@ def vw_sample_probabilistic_decision_tree_viz(depth,selected_to_drop):
                             from datetime import datetime
                             entry = {
                                 "Description": failure_description,
-                                "Important Parameters": ", ".join(important_parameters) if important_parameters else "None specified",
+                                "Important Parameters": important_parameters if important_parameters else "None specified",
                                 "Failure Name": failure_name,
                                 "Hypothesis Probability": hypothesis_probability,
                                 "Failure Importance": failure_importance,
