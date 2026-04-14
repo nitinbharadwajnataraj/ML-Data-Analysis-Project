@@ -95,7 +95,7 @@ def llm_analysis(json,sess_state):
     placeholder="Example: How many path leads to Z_Scratch leaf Node\n", key=f"prompt_input_{sess_state}")
 
     if st.button("Generate AI-Based Analysis"):
-        client = OpenAI(api_key=st.secrets["api_keys"]["wisdom_gate"], base_url="https://wisdom-gate.juheapi.com/v1")
+        client = OpenAI(api_key= st.secrets["api_keys"]["gemini"], base_url="https://generativelanguage.googleapis.com/v1beta/openai/")
         answer = generate_analysis_from_llm(prompt, client, json)
         if answer:
             st.session_state[f"llm_answer_{sess_state}"] = answer
@@ -140,7 +140,7 @@ def generate_analysis_from_llm(prompt, client, tree_json):
 
     try:
         response = client.chat.completions.create(
-            model="wisdom-ai-dsv3",
+            model="gemini-3-flash-preview",
             messages=messages
         )
         return response.choices[0].message.content.strip()
@@ -152,7 +152,7 @@ def generate_analysis_from_llm(prompt, client, tree_json):
 def steel_faults_probabilistic_decision_tree_viz(depth):
     preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree_Steel_Faults(depth)
     tab0, tab1, tab2, tab4, tab5 = st.tabs(
-        ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Steel Faults PDT Visualization", "Analysis"])
+        ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Steel Faults PDT Visualization", "Custom Insights"])
     preci_value = round(preci_value, 4)
     recall_value = round(recall_value, 4)
     accuracy_value = round(accuracy_value, 4)
@@ -518,7 +518,7 @@ def steel_faults_probabilistic_decision_tree_viz(depth):
                 st.session_state.last_depth_prob_dt_steel_faults = dtc.get_depth()
 
             updated_state = streamlit_flow(
-                'decision_tree_flow',
+                'decision_tree_flow_steel_faults',
                 st.session_state.tree_flow_state_prob_dt_steel_faults,
                 fit_view=True,
                 get_node_on_click=True,
@@ -576,62 +576,65 @@ def steel_faults_probabilistic_decision_tree_viz(depth):
         llm_analysis(json, "steel_faults")
         
     with tab5:
-        st.header("Analyse via Image")
+        # st.header("Analyse via Image")
 
-        # Import required libraries
-        from streamlit_cropperjs import st_cropperjs
-        import base64
-        from io import BytesIO
+        # # Import required libraries
+        # from streamlit_cropperjs import st_cropperjs
+        # import base64
+        # from io import BytesIO
         import time
-        from PIL import Image
-        import numpy as np
+        # from PIL import Image
+        # import numpy as np
 
         # Initialize session state for tree screenshot
         if 'tree_screenshot_steel_faults' not in st.session_state:
             st.session_state['tree_screenshot_steel_faults'] = None
+        
+        if 'tree_screenshot_dt_steel_faults' not in st.session_state:
+            st.session_state['tree_screenshot_dt_steel_faults'] = None
 
-        # Image upload section
-        uploaded_file = st.file_uploader(
-            "Upload an Image (only .jpg, .jpeg, .png allowed)",
-            type=["jpg", "jpeg", "png"]
-        )
+        # # Image upload section
+        # uploaded_file = st.file_uploader(
+        #     "Upload an Image (only .jpg, .jpeg, .png allowed)",
+        #     type=["jpg", "jpeg", "png"]
+        # )
 
-        if uploaded_file:
-            # Read the image and convert to a format suitable for cropperjs
-            image_bytes = uploaded_file.getvalue()
-            st.session_state['original_image_steel_faults'] = image_bytes
+        # if uploaded_file:
+        #     # Read the image and convert to a format suitable for cropperjs
+        #     image_bytes = uploaded_file.getvalue()
+        #     st.session_state['original_image_steel_faults'] = image_bytes
             
-            # Display and crop image using cropperjs
-            cropped_img = st_cropperjs(
-                img_file=uploaded_file,
-                box_color='red',
-                aspect_ratio=None,
-                return_type='bytes'
-            )
+        #     # Display and crop image using cropperjs
+        #     cropped_img = st_cropperjs(
+        #         img_file=uploaded_file,
+        #         box_color='red',
+        #         aspect_ratio=None,
+        #         return_type='bytes'
+        #     )
             
-            if cropped_img:
-                # Show the cropped image
-                st.image(cropped_img, caption="Processed Image", use_container_width=True)
+        #     if cropped_img:
+        #         # Show the cropped image
+        #         st.image(cropped_img, caption="Processed Image", use_container_width=True)
                 
-                # Save the cropped image for download
-                st.session_state['cropped_image_steel_faults'] = cropped_img
+        #         # Save the cropped image for download
+        #         st.session_state['cropped_image_steel_faults'] = cropped_img
                 
-                # Add download button for the cropped image
-                st.download_button(
-                    label="Download Processed Image",
-                    data=cropped_img,
-                    file_name=f"processed_image_{int(time.time())}.png",
-                    mime="image/png"
-                )
+        #         # Add download button for the cropped image
+        #         st.download_button(
+        #             label="Download Processed Image",
+        #             data=cropped_img,
+        #             file_name=f"processed_image_{int(time.time())}.png",
+        #             mime="image/png"
+        #         )
                 
-                # Add image analysis functionality here
-                st.info("Image analysis will be performed here. You can add your image processing code.")
+        #         # Add image analysis functionality here
+        #         st.info("Image analysis will be performed here. You can add your image processing code.")
                 
-                # Example placeholder for image analysis results
-                with st.expander("Image Analysis Results", expanded=False):
-                    st.write("Your image analysis results will appear here.")
+        #         # Example placeholder for image analysis results
+        #         with st.expander("Image Analysis Results", expanded=False):
+        #             st.write("Your image analysis results will appear here.")
 
-        st.markdown("---")
+        st.markdown("### Create Custom Tree")
 
         # Tree Canvas Management
         if 'show_tree_canvas_pdt_steel_faults' not in st.session_state:
@@ -680,7 +683,7 @@ def steel_faults_probabilistic_decision_tree_viz(depth):
 
                 # Draw flow component
                 st.session_state.canvas_state_dt_steel_faults = streamlit_flow(
-                    key='fully_interactive_flow',
+                    key='fully_interactive_flow_steel_faults',
                     state=st.session_state.canvas_state_dt_steel_faults,
                     fit_view=True,
                     show_controls=True,
@@ -813,7 +816,17 @@ def steel_faults_probabilistic_decision_tree_viz(depth):
                     
                     # Add edges
                     for edge in st.session_state.canvas_state_dt_steel_faults.edges:
-                        G.add_edge(edge.source, edge.target)
+                        edge_label = None
+
+                        # Extract label from edge data (React Flow usually stores it here)
+                        if hasattr(edge, 'data') and isinstance(edge.data, dict):
+                            edge_label = edge.data.get('label')
+
+                        # Fallback: sometimes label is directly on the edge
+                        if not edge_label and hasattr(edge, 'label'):
+                            edge_label = edge.label
+
+                        G.add_edge(edge.source, edge.target, label=edge_label)
                     
                     # Create a figure and draw the graph
                     plt.figure(figsize=(12, 8), facecolor='white')
@@ -843,12 +856,31 @@ def steel_faults_probabilistic_decision_tree_viz(depth):
                                           alpha=0.8)
                     
                     # Draw edges with arrows - make them visible
-                    nx.draw_networkx_edges(G, pos, 
-                                          arrows=True,
-                                          arrowsize=20,
-                                          width=2,
-                                          edge_color='black',
-                                          alpha=0.8)
+                    nx.draw_networkx_edges(
+                                        G, pos,
+                                        arrows=True,
+                                        arrowsize=25,
+                                        width=2,
+                                        edge_color='black',
+                                        alpha=0.8,
+                                        connectionstyle='arc3,rad=0.0',   # ✅ pushes edges straight
+                                        min_source_margin=25,              # ✅ keeps arrow away from source node
+                                        min_target_margin=25               # ✅ keeps arrow outside target node
+                                    )
+                    
+                    # 🔥 ADD THIS BLOCK RIGHT HERE (edge labels)
+                    edge_labels = {
+                        (u, v): d['label']
+                        for u, v, d in G.edges(data=True)
+                        if d.get('label')
+                    }
+
+                    nx.draw_networkx_edge_labels(
+                        G, pos,
+                        edge_labels=edge_labels,
+                        font_size=10,
+                        label_pos=0.5
+                    )
                     
                     # Use ONLY the extracted clean labels for node labels
                     clean_labels = {node_id: G.nodes[node_id]['label'] for node_id in G.nodes}
@@ -903,10 +935,10 @@ def steel_faults_probabilistic_decision_tree_viz(depth):
             )
             
             # Image Download button (only show if we have a tree visualization)
-            if st.session_state['tree_screenshot_steel_faults'] is not None:
+            if st.session_state['tree_screenshot_dt_steel_faults'] is not None:
                 col2.download_button(
                     label="Download Tree Image",
-                    data=st.session_state['tree_screenshot_steel_faults'],
+                    data=st.session_state['tree_screenshot_dt_steel_faults'],
                     file_name=f"tree_visualization_{int(time.time())}.png",
                     mime="image/png"
                 )
@@ -940,6 +972,8 @@ def steel_faults_probabilistic_decision_tree_viz(depth):
             }
         # Domain Hypothesis Form
         with st.container():
+            st.markdown('---')
+            st.markdown("### 💬 Expert Insights")
             with st.expander("💬 Domain Hypothesis", expanded=False):
                 with st.form(key="domain_hypothesis_form_dt"):
                     st.markdown("### 📌 Domain Hypothesis Entry")

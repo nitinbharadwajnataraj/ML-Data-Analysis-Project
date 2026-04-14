@@ -510,7 +510,7 @@ def rename_dataframe_columns(df):
 def decision_tree_viz(depth):
     preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Decision_Tress(depth)
     tab0, tab1, tab2, tab4, tab5 = st.tabs(
-        ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Decision Tree Visualization", "Analysis"])
+        ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Decision Tree Visualization", "Custom Insights"])
     preci_value = round(preci_value, 4)
     recall_value = round(recall_value, 4)
     accuracy_value = round(accuracy_value, 4)
@@ -884,62 +884,62 @@ def decision_tree_viz(depth):
 
 
     with tab5:
-        st.header("Analyse via Image")
+        # st.header("Analyse via Image")
 
-        # Import required libraries
-        from streamlit_cropperjs import st_cropperjs
-        import base64
-        from io import BytesIO
+        # # Import required libraries
+        # from streamlit_cropperjs import st_cropperjs
+        # import base64
+        # from io import BytesIO
         import time
-        from PIL import Image
-        import numpy as np
+        # from PIL import Image
+        # import numpy as np
 
         # Initialize session state for tree screenshot
         if 'tree_screenshot' not in st.session_state:
             st.session_state['tree_screenshot'] = None
 
-        # Image upload section
-        uploaded_file = st.file_uploader(
-            "Upload an Image (only .jpg, .jpeg, .png allowed)",
-            type=["jpg", "jpeg", "png"]
-        )
+        # # Image upload section
+        # uploaded_file = st.file_uploader(
+        #     "Upload an Image (only .jpg, .jpeg, .png allowed)",
+        #     type=["jpg", "jpeg", "png"]
+        # )
 
-        if uploaded_file:
-            # Read the image and convert to a format suitable for cropperjs
-            image_bytes = uploaded_file.getvalue()
-            st.session_state['original_image'] = image_bytes
+        # if uploaded_file:
+        #     # Read the image and convert to a format suitable for cropperjs
+        #     image_bytes = uploaded_file.getvalue()
+        #     st.session_state['original_image'] = image_bytes
             
-            # Display and crop image using cropperjs
-            cropped_img = st_cropperjs(
-                img_file=uploaded_file,
-                box_color='red',
-                aspect_ratio=None,
-                return_type='bytes'
-            )
+        #     # Display and crop image using cropperjs
+        #     cropped_img = st_cropperjs(
+        #         img_file=uploaded_file,
+        #         box_color='red',
+        #         aspect_ratio=None,
+        #         return_type='bytes'
+        #     )
             
-            if cropped_img:
-                # Show the cropped image
-                st.image(cropped_img, caption="Processed Image", use_container_width=True)
+        #     if cropped_img:
+        #         # Show the cropped image
+        #         st.image(cropped_img, caption="Processed Image", use_container_width=True)
                 
-                # Save the cropped image for download
-                st.session_state['cropped_image'] = cropped_img
+        #         # Save the cropped image for download
+        #         st.session_state['cropped_image'] = cropped_img
                 
-                # Add download button for the cropped image
-                st.download_button(
-                    label="Download Processed Image",
-                    data=cropped_img,
-                    file_name=f"processed_image_{int(time.time())}.png",
-                    mime="image/png"
-                )
+        #         # Add download button for the cropped image
+        #         st.download_button(
+        #             label="Download Processed Image",
+        #             data=cropped_img,
+        #             file_name=f"processed_image_{int(time.time())}.png",
+        #             mime="image/png"
+        #         )
                 
-                # Add image analysis functionality here
-                st.info("Image analysis will be performed here. You can add your image processing code.")
+        #         # Add image analysis functionality here
+        #         st.info("Image analysis will be performed here. You can add your image processing code.")
                 
-                # Example placeholder for image analysis results
-                with st.expander("Image Analysis Results", expanded=False):
-                    st.write("Your image analysis results will appear here.")
+        #         # Example placeholder for image analysis results
+        #         with st.expander("Image Analysis Results", expanded=False):
+        #             st.write("Your image analysis results will appear here.")
 
-        st.markdown("---")
+        st.markdown("### Create Custom Tree")
 
         # Tree Canvas Management
         if 'show_tree_canvas_dt' not in st.session_state:
@@ -1121,7 +1121,17 @@ def decision_tree_viz(depth):
                     
                     # Add edges
                     for edge in st.session_state.canvas_state_dt.edges:
-                        G.add_edge(edge.source, edge.target)
+                        edge_label = None
+
+                        # Extract label from edge data (React Flow usually stores it here)
+                        if hasattr(edge, 'data') and isinstance(edge.data, dict):
+                            edge_label = edge.data.get('label')
+
+                        # Fallback: sometimes label is directly on the edge
+                        if not edge_label and hasattr(edge, 'label'):
+                            edge_label = edge.label
+
+                        G.add_edge(edge.source, edge.target, label=edge_label)
                     
                     # Create a figure and draw the graph
                     plt.figure(figsize=(12, 8), facecolor='white')
@@ -1151,12 +1161,31 @@ def decision_tree_viz(depth):
                                           alpha=0.8)
                     
                     # Draw edges with arrows - make them visible
-                    nx.draw_networkx_edges(G, pos, 
-                                          arrows=True,
-                                          arrowsize=20,
-                                          width=2,
-                                          edge_color='black',
-                                          alpha=0.8)
+                    nx.draw_networkx_edges(
+                                        G, pos,
+                                        arrows=True,
+                                        arrowsize=25,
+                                        width=2,
+                                        edge_color='black',
+                                        alpha=0.8,
+                                        connectionstyle='arc3,rad=0.0',   # ✅ pushes edges straight
+                                        min_source_margin=25,              # ✅ keeps arrow away from source node
+                                        min_target_margin=25               # ✅ keeps arrow outside target node
+                                    )
+                    
+                    # 🔥 ADD THIS BLOCK RIGHT HERE (edge labels)
+                    edge_labels = {
+                        (u, v): d['label']
+                        for u, v, d in G.edges(data=True)
+                        if d.get('label')
+                    }
+
+                    nx.draw_networkx_edge_labels(
+                        G, pos,
+                        edge_labels=edge_labels,
+                        font_size=10,
+                        label_pos=0.5
+                    )
                     
                     # Use ONLY the extracted clean labels for node labels
                     clean_labels = {node_id: G.nodes[node_id]['label'] for node_id in G.nodes}
@@ -1375,7 +1404,7 @@ def decision_tree_viz(depth):
 def probabilistic_decision_tree_viz(depth):
     preci_value, recall_value, accuracy_value, classification_report_val, confusion_matrix_test, dtc, feature_names = Probabilistic_Decision_Tree(depth)
     tab0, tab1, tab2, tab4, tab5 = st.tabs(
-        ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Probabilistic Decision Tree Visualization", "Analysis"])
+        ["User Prediction", "Confusion-Matrix", "Evaluation-Metrics", "Probabilistic Decision Tree Visualization", "Custom Insights"])
     preci_value = round(preci_value, 4)
     recall_value = round(recall_value, 4)
     accuracy_value = round(accuracy_value, 4)
@@ -1701,7 +1730,7 @@ def probabilistic_decision_tree_viz(depth):
                 st.session_state.last_depth_prob_dt = dtc.get_depth()
 
             updated_state = streamlit_flow(
-                'decision_tree_flow',
+                'decision_tree_flow_pdt',
                 st.session_state.tree_flow_state_prob_dt,
                 fit_view=True,
                 get_node_on_click=True,
@@ -1749,62 +1778,62 @@ def probabilistic_decision_tree_viz(depth):
         llm_analysis(json,"pdt")
         
     with tab5:
-        st.header("Analyse via Image")
+        # st.header("Analyse via Image")
 
-        # Import required libraries
-        from streamlit_cropperjs import st_cropperjs
-        import base64
-        from io import BytesIO
+        # # Import required libraries
+        # from streamlit_cropperjs import st_cropperjs
+        # import base64
+        # from io import BytesIO
         import time
-        from PIL import Image
-        import numpy as np
+        # from PIL import Image
+        # import numpy as np
 
-        # Initialize session state for tree screenshot
-        if 'tree_screenshot' not in st.session_state:
-            st.session_state['tree_screenshot'] = None
+        # # Initialize session state for tree screenshot
+        if 'tree_screenshot_pdt' not in st.session_state:
+            st.session_state['tree_screenshot_pdt'] = None
 
-        # Image upload section
-        uploaded_file = st.file_uploader(
-            "Upload an Image (only .jpg, .jpeg, .png allowed)",
-            type=["jpg", "jpeg", "png"]
-        )
+        # # Image upload section
+        # uploaded_file = st.file_uploader(
+        #     "Upload an Image (only .jpg, .jpeg, .png allowed)",
+        #     type=["jpg", "jpeg", "png"]
+        # )
 
-        if uploaded_file:
-            # Read the image and convert to a format suitable for cropperjs
-            image_bytes = uploaded_file.getvalue()
-            st.session_state['original_image'] = image_bytes
+        # if uploaded_file:
+        #     # Read the image and convert to a format suitable for cropperjs
+        #     image_bytes = uploaded_file.getvalue()
+        #     st.session_state['original_image'] = image_bytes
             
-            # Display and crop image using cropperjs
-            cropped_img = st_cropperjs(
-                img_file=uploaded_file,
-                box_color='red',
-                aspect_ratio=None,
-                return_type='bytes'
-            )
+        #     # Display and crop image using cropperjs
+        #     cropped_img = st_cropperjs(
+        #         img_file=uploaded_file,
+        #         box_color='red',
+        #         aspect_ratio=None,
+        #         return_type='bytes'
+        #     )
             
-            if cropped_img:
-                # Show the cropped image
-                st.image(cropped_img, caption="Processed Image", use_container_width=True)
+        #     if cropped_img:
+        #         # Show the cropped image
+        #         st.image(cropped_img, caption="Processed Image", use_container_width=True)
                 
-                # Save the cropped image for download
-                st.session_state['cropped_image'] = cropped_img
+        #         # Save the cropped image for download
+        #         st.session_state['cropped_image'] = cropped_img
                 
-                # Add download button for the cropped image
-                st.download_button(
-                    label="Download Processed Image",
-                    data=cropped_img,
-                    file_name=f"processed_image_{int(time.time())}.png",
-                    mime="image/png"
-                )
+        #         # Add download button for the cropped image
+        #         st.download_button(
+        #             label="Download Processed Image",
+        #             data=cropped_img,
+        #             file_name=f"processed_image_{int(time.time())}.png",
+        #             mime="image/png"
+        #         )
                 
-                # Add image analysis functionality here
-                st.info("Image analysis will be performed here. You can add your image processing code.")
+        #         # Add image analysis functionality here
+        #         st.info("Image analysis will be performed here. You can add your image processing code.")
                 
-                # Example placeholder for image analysis results
-                with st.expander("Image Analysis Results", expanded=False):
-                    st.write("Your image analysis results will appear here.")
+        #         # Example placeholder for image analysis results
+        #         with st.expander("Image Analysis Results", expanded=False):
+        #             st.write("Your image analysis results will appear here.")
 
-        st.markdown("---")
+        st.markdown("### Create Custom Tree")
 
         # Tree Canvas Management
         if 'show_tree_canvas_pdt' not in st.session_state:
@@ -1823,8 +1852,8 @@ def probabilistic_decision_tree_viz(depth):
         # Tree Canvas Section
         if st.session_state['show_tree_canvas_pdt']:
             # Initialize canvas state if not present
-            if 'canvas_state_dt' not in st.session_state:
-                st.session_state.canvas_state_dt = StreamlitFlowState([], [])
+            if 'canvas_state_pdt' not in st.session_state:
+                st.session_state.canvas_state_pdt = StreamlitFlowState([], [])
 
             # Create a container for our tree with a unique key for capturing
             tree_container = st.container()
@@ -1852,9 +1881,9 @@ def probabilistic_decision_tree_viz(depth):
                 st.info('Right click on the canvas to add Nodes and Edges')
 
                 # Draw flow component
-                st.session_state.canvas_state_dt = streamlit_flow(
-                    key='fully_interactive_flow',
-                    state=st.session_state.canvas_state_dt,
+                st.session_state.canvas_state_pdt = streamlit_flow(
+                    key='fully_interactive_flow_pdt',
+                    state=st.session_state.canvas_state_pdt,
                     fit_view=True,
                     show_controls=True,
                     allow_new_edges=True,
@@ -1870,7 +1899,7 @@ def probabilistic_decision_tree_viz(depth):
                     st.subheader("Node Structure Information")
                     
                     node_debug_list = []
-                    for node in st.session_state.canvas_state_dt.nodes:
+                    for node in st.session_state.canvas_state_pdt.nodes:
                         # Get node data fields
                         data_fields = {}
                         if hasattr(node, 'data') and isinstance(node.data, dict):
@@ -1899,13 +1928,13 @@ def probabilistic_decision_tree_viz(depth):
 
             # Metrics display
             col1, col2 = st.columns(2)
-            col1.metric("Nodes", len(st.session_state.canvas_state_dt.nodes))
-            col2.metric("Edges", len(st.session_state.canvas_state_dt.edges))
+            col1.metric("Nodes", len(st.session_state.canvas_state_pdt.nodes))
+            col2.metric("Edges", len(st.session_state.canvas_state_pdt.edges))
 
             st.markdown("---")
 
                                 # Create a PNG representation of the tree (server-side)
-            if len(st.session_state.canvas_state_dt.nodes) > 0:
+            if len(st.session_state.canvas_state_pdt.nodes) > 0:
                 try:
                     import matplotlib.pyplot as plt
                     import networkx as nx
@@ -1930,7 +1959,7 @@ def probabilistic_decision_tree_viz(depth):
                     node_debug_info = {}
                     
                     # Improved node label extraction
-                    for node in st.session_state.canvas_state_dt.nodes:
+                    for node in st.session_state.canvas_state_pdt.nodes:
                         node_id = str(node.id)
                         
                         # Initialize default label as None
@@ -1985,8 +2014,18 @@ def probabilistic_decision_tree_viz(depth):
                     st.session_state['node_debug_info'] = node_debug_info
                     
                     # Add edges
-                    for edge in st.session_state.canvas_state_dt.edges:
-                        G.add_edge(edge.source, edge.target)
+                    for edge in st.session_state.canvas_state_pdt.edges:
+                        edge_label = None
+
+                        # Extract label from edge data (React Flow usually stores it here)
+                        if hasattr(edge, 'data') and isinstance(edge.data, dict):
+                            edge_label = edge.data.get('label')
+
+                        # Fallback: sometimes label is directly on the edge
+                        if not edge_label and hasattr(edge, 'label'):
+                            edge_label = edge.label
+
+                        G.add_edge(edge.source, edge.target, label=edge_label)
                     
                     # Create a figure and draw the graph
                     plt.figure(figsize=(12, 8), facecolor='white')
@@ -2016,12 +2055,31 @@ def probabilistic_decision_tree_viz(depth):
                                           alpha=0.8)
                     
                     # Draw edges with arrows - make them visible
-                    nx.draw_networkx_edges(G, pos, 
-                                          arrows=True,
-                                          arrowsize=20,
-                                          width=2,
-                                          edge_color='black',
-                                          alpha=0.8)
+                    nx.draw_networkx_edges(
+                                        G, pos,
+                                        arrows=True,
+                                        arrowsize=25,
+                                        width=2,
+                                        edge_color='black',
+                                        alpha=0.8,
+                                        connectionstyle='arc3,rad=0.0',   # ✅ pushes edges straight
+                                        min_source_margin=25,              # ✅ keeps arrow away from source node
+                                        min_target_margin=25               # ✅ keeps arrow outside target node
+                                    )
+                    
+                    # 🔥 ADD THIS BLOCK RIGHT HERE (edge labels)
+                    edge_labels = {
+                        (u, v): d['label']
+                        for u, v, d in G.edges(data=True)
+                        if d.get('label')
+                    }
+
+                    nx.draw_networkx_edge_labels(
+                        G, pos,
+                        edge_labels=edge_labels,
+                        font_size=10,
+                        label_pos=0.5
+                    )
                     
                     # Use ONLY the extracted clean labels for node labels
                     clean_labels = {node_id: G.nodes[node_id]['label'] for node_id in G.nodes}
@@ -2046,7 +2104,7 @@ def probabilistic_decision_tree_viz(depth):
                     plt.close()
                     
                     # Save the visualization to session state
-                    st.session_state['tree_screenshot'] = buf.getvalue()
+                    st.session_state['tree_screenshot_pdt'] = buf.getvalue()
                     
                     # Show a preview of the download image
                     st.subheader("Preview of Downloadable Tree Image")
@@ -2056,8 +2114,8 @@ def probabilistic_decision_tree_viz(depth):
 
             # Export functionality
             tree_data = {
-                "nodes": [node.__dict__ for node in st.session_state.canvas_state_dt.nodes],
-                "edges": [edge.__dict__ for edge in st.session_state.canvas_state_dt.edges]
+                "nodes": [node.__dict__ for node in st.session_state.canvas_state_pdt.nodes],
+                "edges": [edge.__dict__ for edge in st.session_state.canvas_state_pdt.edges]
             }
 
             # Make sure json is properly imported and not shadowed
@@ -2076,14 +2134,17 @@ def probabilistic_decision_tree_viz(depth):
             )
             
             # Image Download button (only show if we have a tree visualization)
-            if st.session_state['tree_screenshot'] is not None:
+            if st.session_state['tree_screenshot_pdt'] is not None:
                 col2.download_button(
                     label="Download Tree Image",
-                    data=st.session_state['tree_screenshot'],
+                    data=st.session_state['tree_screenshot_pdt'],
                     file_name=f"tree_visualization_{int(time.time())}.png",
                     mime="image/png"
                 )
-            
+
+        st.markdown('---')
+        st.markdown("### 💬 Expert Insights")
+
         # Initialize hypothesis state
         if "submitted_hypotheses" not in st.session_state:
             st.session_state["submitted_hypotheses"] = []
@@ -2312,7 +2373,7 @@ def generate_analysis_from_llm(prompt, client, tree_json):
 
     try:
         response = client.chat.completions.create(
-            model="gemini-1.5-flash",
+            model="gemini-3-flash-preview",
             messages=messages
         )
         return response.choices[0].message.content.strip()
