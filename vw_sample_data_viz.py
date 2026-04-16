@@ -57,7 +57,15 @@ def display_prediction(predictions):
     st.markdown(f' <p  style="color:{color};font-size:20px;">{predict}{predictions_val}</p>', unsafe_allow_html=True)
 
 def get_table_download_link():
-    df = pd.read_csv("Analysis_Data_augmented_csv.csv", sep=';',decimal=',',on_bad_lines='skip')
+    df_full = pd.read_csv("Analysis_Data_augmented_csv.csv", sep=';',decimal=',',on_bad_lines='skip')
+    # Keep rows with at least 80% non-null values
+    threshold = int(0.8 * df_full.shape[1])
+    df_clean = df_full.dropna(thresh=threshold)
+    df = (
+    df_clean
+    .groupby("Ergebnis", group_keys=False)
+    .apply(lambda x: x.sample(n=3, random_state=42))
+    .reset_index(drop=True))
 
     output = BytesIO()
     writer = pd.ExcelWriter(output, engine='xlsxwriter')
@@ -166,7 +174,7 @@ def vw_sample_probabilistic_decision_tree_viz(depth,selected_to_drop):
                 st.warning('There are more than 30 input features and hence Manual Input is disabled')
 
         elif option == "Upload Excel File":
-            st.write('Do not have a file to upload? Click below to download a sample test file')
+            st.info('Do not have a file to upload? Click below to download a sample test file')
             # Provide a template for download
             st.markdown(get_table_download_link(), unsafe_allow_html=True)
             uploaded_file = st.file_uploader("Upload an Excel or CSV file", type=["xlsx", "xls", "csv"])

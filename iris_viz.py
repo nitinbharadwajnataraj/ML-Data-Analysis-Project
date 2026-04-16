@@ -169,6 +169,8 @@ def iris_probabilistic_decision_tree_viz(depth):
                     display_prediction(prediction)
 
         elif option == "Upload Excel File":
+            st.info('Do not have a file to upload? Click below to download a sample test file')
+            st.markdown(get_table_download_link(), unsafe_allow_html=True)
             uploaded_file = st.file_uploader("Upload an Excel or CSV file", type=["xlsx", "xls", "csv"])
             if uploaded_file is not None:
                 file_ext = uploaded_file.name.split('.')[-1]
@@ -207,10 +209,6 @@ def iris_probabilistic_decision_tree_viz(depth):
 
                     st.write("Predictions:")
                     st.dataframe(df_input_val_styled)
-            else:
-                st.error("Please upload an Excel (xlsx/xls) or CSV (csv) file.")
-                # Provide a template for download
-                st.markdown(get_table_download_link(), unsafe_allow_html=True)
 
     with tab1:
         # confusion_matrix_df = pd.DataFrame(confusion_matrix_test, index=['Transition', 'Excess', 'Clearance'],
@@ -917,7 +915,7 @@ def iris_probabilistic_decision_tree_viz(depth):
         with st.container():
             st.markdown('---')
             st.markdown("### 💬 Expert Insights")
-            with st.expander("💬 Domain Hypothesis", expanded=False):
+            with st.expander("💬 Domain Hypothesis", expanded=True):
                 with st.form(key="domain_hypothesis_form_dt"):
                     st.markdown("### 📌 Domain Hypothesis Entry")
 
